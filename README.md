@@ -32,6 +32,31 @@ export EVER_MEM_OS_CLIENT_BASE_URL="https://api.evermind.ai"
 - **特点**: 使用 `EverMemOS` 客户端，适合同步应用场景
 - **运行**: `python add_sync.py`
 
+#### `batch_add_async.py` - 批量异步创建记忆
+- **用途**: 从文件读取内容并批量创建多条记忆
+- **功能**: 
+  - 读取文件并按句号截断，每超过指定字数输出一次并添加到记忆库
+  - 自动处理章节标题（"第xxx章"），确保章节标题单独成块
+  - 压缩空行和多个空格为一个空格，规范化文本
+  - 支持从指定块号开始处理，支持限制处理块数
+- **特点**: 
+  - 仅使用 SDK 方式（`AsyncEverMemOS`）
+  - 使用生成器方式处理大文件，内存友好
+  - 支持断点续传（通过起始块号参数）
+  - 包含详细的进度和统计信息
+- **运行**: 
+  - `python batch_add_async.py <文件路径> [块大小] [起始块号] [最大块数]`
+  - 示例: `python batch_add_async.py input.txt 1000`
+  - 示例: `python batch_add_async.py input.txt 1000 5  # 从第5块开始`
+  - 示例: `python batch_add_async.py input.txt 1000 1 10  # 从第1块开始，处理10个块`
+- **环境变量**:
+  - `EVERMEMOS_API_KEY`: API密钥（必需）
+  - `EVER_MEM_OS_CLIENT_BASE_URL`: API地址（可选）
+  - `EVERMEMOS_GROUP_ID`: 群组ID（默认: group_123）
+  - `EVERMEMOS_GROUP_NAME`: 群组名称（默认: Project Discussion Group）
+  - `EVERMEMOS_SENDER`: 发送者ID（默认: user_001）
+  - `EVERMEMOS_SENDER_NAME`: 发送者名称（默认: User）
+
 ### 获取记忆
 
 #### `get_async.py` - 异步获取/列出记忆
@@ -111,6 +136,7 @@ export EVER_MEM_OS_CLIENT_BASE_URL="https://api.evermind.ai"
 
 ### 异步示例（推荐）
 - `add_async.py`
+- `batch_add_async.py`
 - `get_async.py`
 - `search_async.py`
 - `delete_async.py`
