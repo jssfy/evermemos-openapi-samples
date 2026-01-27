@@ -14,7 +14,7 @@ client = AsyncEverMemOS(
 
 async def main() -> None:
     # 获取记忆
-    memory_result = await client.v1.memories.list(
+    memory_result = await client.v1.memories.get(
         extra_query={
             "user_id": "天下霸唱",
             "memory_type": "profile",
