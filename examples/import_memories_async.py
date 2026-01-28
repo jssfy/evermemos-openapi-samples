@@ -71,16 +71,7 @@ async def main() -> None:
                     "type": "text",
                 },
             ],
-            version="1.0.0",  # Format version parameter (required by SDK)
-            # Workaround: Use extra_body to force-merge version into conversation_meta
-            # This bypasses SDK's TypedDict validation and ensures version is included
-            # in the conversation_meta object sent to the backend
-            extra_body={
-                "conversation_meta": {
-                    **conversation_meta_dict,
-                    "version": "1.0.0",  # This version field will be merged into conversation_meta
-                }
-            },
+            version="1.0.0",
         )
         
         print(f"message: {import_response.message}")

@@ -37,10 +37,6 @@ async def main() -> None:
                 "custom_role": "Product Manager",
             },
         },
-        # Use extra_body to pass required fields not defined in the SDK
-        extra_body={
-            "version": "1.0",
-        },
     )
     print(f"Create result - message: {meta_response.message}")
     print(f"Create result - status: {meta_response.status}")
