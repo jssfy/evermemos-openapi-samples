@@ -20,39 +20,40 @@ async def main() -> None:
     
     # Check base_url configuration
     base_url = os.environ.get("EVER_MEM_OS_CLIENT_BASE_URL")
-    if not base_url:
-        print("⚠️  Warning: EVER_MEM_OS_CLIENT_BASE_URL environment variable not set")
-        print("   Please ensure base_url is configured correctly and the server supports /api/v1/memories/import endpoint")
-    else:
-        print(f"Using base_url: {base_url}")
+    if base_url:
+        print(f"Using base_url: {base_url}\n")
     
     try:
-        import_response = await client.v1.memories.load(
-            conversation_meta={
-                "group_id": group_id,
-                "name": "Test Import Conversation",
-                "scene": "group_chat",  # or "assistant"
-                "scene_desc": {
-                    "description": "Conversation for testing batch import functionality",
-                    "purpose": "Testing",
+        # Prepare conversation_meta dictionary
+        # Note: We'll use extra_body to force-add the version field
+        conversation_meta_dict = {
+            "group_id": group_id,
+            "name": "Test Import Conversation",
+            "scene": "group_chat",  # or "assistant"
+            "scene_desc": {
+                "description": "Conversation for testing batch import functionality",
+                "purpose": "Testing",
+            },
+            "description": "This is a conversation metadata for testing batch import functionality",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "default_timezone": "Asia/Shanghai",
+            "tags": ["test", "import"],
+            "user_details": {
+                "user_001": {
+                    "full_name": "User One",
+                    "role": "user",
+                    "custom_role": "Test User",
                 },
-                "description": "This is a conversation metadata for testing batch import functionality",
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "default_timezone": "Asia/Shanghai",
-                "tags": ["test", "import"],
-                "user_details": {
-                    "user_001": {
-                        "full_name": "User One",
-                        "role": "user",
-                        "custom_role": "Test User",
-                    },
-                    "user_002": {
-                        "full_name": "User Two",
-                        "role": "user",
-                        "custom_role": "Test User",
-                    },
+                "user_002": {
+                    "full_name": "User Two",
+                    "role": "user",
+                    "custom_role": "Test User",
                 },
             },
+        }
+        
+        import_response = await client.v1.memories.load(
+            conversation_meta=conversation_meta_dict,
             conversation_list=[
                 {
                     "message_id": f"msg_{int(datetime.now(timezone.utc).timestamp() * 1000)}_1",
@@ -82,7 +83,16 @@ async def main() -> None:
                     "type": "text",
                 },
             ],
-            version="1.0.0",
+            version="1.0.0",  # Format version parameter (required by SDK)
+            # Workaround: Use extra_body to force-merge version into conversation_meta
+            # This bypasses SDK's TypedDict validation and ensures version is included
+            # in the conversation_meta object sent to the backend
+            extra_body={
+                "conversation_meta": {
+                    **conversation_meta_dict,
+                    "version": "1.0.0",  # This version field will be merged into conversation_meta
+                }
+            },
         )
         
         print(f"message: {import_response.message}")
@@ -124,21 +134,6 @@ async def main() -> None:
                 print(f"   {e.body}")
             else:
                 print(f"   {repr(e.body)}")
-        
-        # If it's a 404 error, provide more help information
-        if "404" in str(e) or "Not Found" in str(e) or (hasattr(e, 'status_code') and e.status_code == 404):
-            print(f"\n💡 Possible solutions:")
-            print(f"   1. Check if EVER_MEM_OS_CLIENT_BASE_URL is configured correctly")
-            print(f"   2. Confirm if the server supports /api/v1/memories/import endpoint")
-            print(f"      - This endpoint may not be available in some environments")
-            print(f"      - If the endpoint does not exist, consider using create() method to create memories one by one")
-            print(f"   3. Check if base_url contains the correct protocol (http:// or https://)")
-            print(f"   4. Confirm there is no trailing slash at the end of base_url")
-            print(f"\n   Current base_url: {base_url or '(not set)'}")
-            print(f"\n   Alternative solutions:")
-            print(f"   - If /api/v1/memories/import endpoint is not available, you can use add_async.py or batch_add_async.py")
-            print(f"   - First use create_meta_async.py to create conversation metadata")
-            print(f"   - Then use add_async.py to add messages one by one")
         
         raise
 

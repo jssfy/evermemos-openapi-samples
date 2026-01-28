@@ -26,9 +26,10 @@ async def main() -> None:
         print(f"Metadata ID: {meta_response.result.id}")
         print(f"Conversation name: {meta_response.result.name}")
         print(f"Scene: {meta_response.result.scene}")
-        print(f"Version: {meta_response.result.version}")
         print(f"Group ID: {meta_response.result.group_id}")
         print(f"Is default config: {meta_response.result.is_default}")
+        if hasattr(meta_response.result, 'version') and meta_response.result.version:
+            print(f"Version: {meta_response.result.version}")
         if meta_response.result.description:
             print(f"Description: {meta_response.result.description}")
         if meta_response.result.default_timezone:
