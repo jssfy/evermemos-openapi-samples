@@ -26,7 +26,6 @@ async def main() -> None:
             "description": "用于项目协作和讨论的群组",
             "purpose": "团队协作",
         },
-        version="1.0",
         group_id="group_project_123",  # 可选，如果提供则针对特定群组
         description="这是一个项目讨论组的元数据配置",
         default_timezone="Asia/Shanghai",
@@ -45,6 +44,10 @@ async def main() -> None:
                 "role": "user",
                 "custom_role": "产品经理",
             },
+        },
+        # 使用 extra_body 传递 SDK 中未定义的必需字段
+        extra_body={
+            "version": "1.0",
         },
     )
     print(f"创建结果 - message: {meta_response.message}")
