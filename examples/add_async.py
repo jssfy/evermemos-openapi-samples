@@ -15,7 +15,7 @@ client = AsyncEverMemOS(
 
 async def main() -> None:
     memory = await client.v1.memories.create(
-        content="使用 isoformat() 生成 RFC3339/ISO 8601 格式的时间字符串",
+        content="Using isoformat() to generate RFC3339/ISO 8601 formatted time string",
         create_time=datetime.now(timezone.utc).isoformat(),
         message_id=f"msg_{int(datetime.now(timezone.utc).timestamp() * 1000)}",
         sender="user_001",

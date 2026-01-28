@@ -14,50 +14,50 @@ client = AsyncEverMemOS(
 
 
 async def main() -> None:
-    # 创建对话元数据
-    # 如果 group_id 存在，会更新整个记录（upsert）
-    # 如果 group_id 不存在，会创建新记录
-    # 如果 group_id 省略，会保存为场景的默认配置
+    # Create conversation metadata
+    # If group_id exists, it will update the entire record (upsert)
+    # If group_id does not exist, it will create a new record
+    # If group_id is omitted, it will be saved as the default configuration for the scene
     meta_response = await client.v1.memories.conversation_meta.create(
         created_at=datetime.now(timezone.utc).isoformat(),
-        name="项目讨论组",
-        scene="group_chat",  # 或 "assistant"
+        name="Project Discussion Group",
+        scene="group_chat",  # or "assistant"
         scene_desc={
-            "description": "用于项目协作和讨论的群组",
-            "purpose": "团队协作",
+            "description": "Group for project collaboration and discussion",
+            "purpose": "Team collaboration",
         },
-        group_id="group_project_123",  # 可选，如果提供则针对特定群组
-        description="这是一个项目讨论组的元数据配置",
+        group_id="group_project_123",  # Optional, if provided, targets a specific group
+        description="This is a metadata configuration for a project discussion group",
         default_timezone="Asia/Shanghai",
-        tags=["项目", "协作", "开发"],
+        tags=["project", "collaboration", "development"],
         user_details={
             "user_001": {
-                "full_name": "张三",
-                "role": "user",  # 或 "assistant"
-                "custom_role": "开发工程师",
+                "full_name": "Zhang San",
+                "role": "user",  # or "assistant"
+                "custom_role": "Software Engineer",
                 "extra": {
-                    "department": "技术部",
+                    "department": "Engineering",
                 },
             },
             "user_002": {
-                "full_name": "李四",
+                "full_name": "Li Si",
                 "role": "user",
-                "custom_role": "产品经理",
+                "custom_role": "Product Manager",
             },
         },
-        # 使用 extra_body 传递 SDK 中未定义的必需字段
+        # Use extra_body to pass required fields not defined in the SDK
         extra_body={
             "version": "1.0",
         },
     )
-    print(f"创建结果 - message: {meta_response.message}")
-    print(f"创建结果 - status: {meta_response.status}")
+    print(f"Create result - message: {meta_response.message}")
+    print(f"Create result - status: {meta_response.status}")
     if meta_response.result:
-        print(f"元数据 ID: {meta_response.result.id}")
-        print(f"对话名称: {meta_response.result.name}")
-        print(f"场景: {meta_response.result.scene}")
-        print(f"群组 ID: {meta_response.result.group_id}")
-        print(f"是否默认配置: {meta_response.result.is_default}")
+        print(f"Metadata ID: {meta_response.result.id}")
+        print(f"Conversation name: {meta_response.result.name}")
+        print(f"Scene: {meta_response.result.scene}")
+        print(f"Group ID: {meta_response.result.group_id}")
+        print(f"Is default config: {meta_response.result.is_default}")
 
 
 if __name__ == "__main__":

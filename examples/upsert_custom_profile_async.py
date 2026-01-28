@@ -14,18 +14,18 @@ client = AsyncEverMemOS(
 
 
 async def main() -> None:
-    # 创建或更新用户自定义档案
-    # 该接口会合并现有数据，重叠字段会被输入覆盖
+    # Create or update user custom profile
+    # This interface will merge existing data, overlapping fields will be overwritten by input
     user_id = os.environ.get("EVERMEMOS_USER_ID", "user_001")
     
     custom_profile_response = await client.v1.global_user_profile.custom.upsert(
         user_id=user_id,
         custom_profile_data={
             "initial_profile": [
-                "用户是一名软件工程师",
-                "用户精通 Python 编程",
-                "用户对 AI 技术感兴趣",
-                "用户喜欢阅读技术文档",
+                "User is a software engineer",
+                "User is proficient in Python programming",
+                "User is interested in AI technology",
+                "User likes to read technical documentation",
             ],
         },
     )
@@ -34,7 +34,7 @@ async def main() -> None:
     print(f"success: {custom_profile_response.success}")
     
     if custom_profile_response.data:
-        print(f"\n档案数据:")
+        print(f"\nProfile data:")
         print(f"  id: {custom_profile_response.data.get('id')}")
         print(f"  user_id: {custom_profile_response.data.get('user_id')}")
         print(f"  confidence: {custom_profile_response.data.get('confidence')}")
@@ -50,7 +50,7 @@ async def main() -> None:
                 for idx, profile_item in enumerate(initial_profile, 1):
                     print(f"    {idx}. {profile_item}")
     else:
-        print("\n档案数据: (无)")
+        print("\nProfile data: (none)")
 
 
 if __name__ == "__main__":

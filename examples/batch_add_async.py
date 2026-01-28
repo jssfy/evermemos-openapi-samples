@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-批量添加记忆到 EverMemOS
-读取文件并按句号截断，每超过指定字数输出一次并添加到记忆库
-使用生成器方式输出，压缩空行和多个空格为一个空格
-仅使用 SDK 方式
+Batch add memories to EverMemOS
+Read file and split by periods, output and add to memory library each time exceeding specified character count
+Use generator approach, compress empty lines and multiple spaces into a single space
+Only use SDK approach
 """
 
 import os
@@ -22,47 +22,47 @@ client = AsyncEverMemOS(
 
 def normalize_text(text: str) -> str:
     """
-    压缩空行和多个空格为一个空格
+    Compress empty lines and multiple spaces into a single space
     
     Args:
-        text: 原始文本
+        text: Original text
         
     Returns:
-        规范化后的文本
+        Normalized text
     """
-    # 将所有空白字符（包括换行、制表符、多个空格）替换为单个空格
+    # Replace all whitespace characters (including newlines, tabs, multiple spaces) with a single space
     text = re.sub(r'\s+', ' ', text)
-    # 去除首尾空格
+    # Remove leading and trailing spaces
     text = text.strip()
     return text
 
 
 def is_chapter_title(text: str) -> bool:
     """
-    判断文本是否以"第xxx章"开头
+    Check if text starts with "Chapter xxx" pattern
     
     Args:
-        text: 要检查的文本
+        text: Text to check
         
     Returns:
-        如果是章节标题返回True，否则返回False
+        True if it's a chapter title, False otherwise
     """
-    # 匹配"第" + 数字/中文数字 + "章"开头的模式
+    # Match pattern starting with "第" + number/Chinese number + "章"
     pattern = r'^第[一二三四五六七八九十百千万\d]+章'
     return bool(re.match(pattern, text.strip()))
 
 
 def read_file_chunks(file_path: str, chunk_size: int = 1000) -> Generator[str, None, None]:
     """
-    读取文件并按句号截断，每超过指定字数输出一次
-    如果遇到"第xxx章"开头的文本，会单独输出，不合并到上一段
+    Read file and split by periods, output each time exceeding specified character count
+    If encountering text starting with "Chapter xxx", output separately without merging with previous paragraph
     
     Args:
-        file_path: 文件路径
-        chunk_size: 每个块的最小字符数（默认1000）
+        file_path: File path
+        chunk_size: Minimum character count per chunk (default 1000)
         
     Yields:
-        每个文本块（字符串）
+        Each text chunk (string)
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -74,16 +74,16 @@ def read_file_chunks(file_path: str, chunk_size: int = 1000) -> Generator[str, N
         print(f"错误: 读取文件时发生异常: {e}", file=sys.stderr)
         return
     
-    # 规范化文本：压缩空行和多个空格
+    # Normalize text: compress empty lines and multiple spaces
     content = normalize_text(content)
     
-    # 使用正则表达式找到所有章节标题的位置，并在前面插入特殊标记
-    # 匹配"第xxx章"开头的文本
+    # Use regex to find all chapter title positions and insert special markers before them
+    # Match text starting with "Chapter xxx"
     chapter_pattern = r'(第[一二三四五六七八九十百千万\d]+章)'
-    # 在章节标题前插入特殊标记（使用一个不太可能出现在文本中的字符串）
+    # Insert special marker before chapter title (using a string unlikely to appear in text)
     marked_content = re.sub(chapter_pattern, r'|||CHAPTER_TITLE|||\1', content)
     
-    # 按特殊标记分割
+    # Split by special marker
     segments = marked_content.split('|||CHAPTER_TITLE|||')
     
     current_chunk = ""
@@ -94,28 +94,28 @@ def read_file_chunks(file_path: str, chunk_size: int = 1000) -> Generator[str, N
         
         segment_stripped = segment.strip()
         
-        # 第一个segment是章节标题之前的文本，直接处理
-        # 其他segment的第一个部分应该是章节标题
+        # First segment is text before chapter title, process directly
+        # First part of other segments should be chapter title
         if idx == 0:
-            # 第一个segment，不是章节标题，直接处理
+            # First segment, not a chapter title, process directly
             parts = re.split(r'([。！？])', segment)
         else:
-            # 检查当前段是否以章节标题开头
+            # Check if current segment starts with chapter title
             if is_chapter_title(segment_stripped):
-                # 如果当前有累积的块，先输出
+                # If there's accumulated chunk, output it first
                 if current_chunk.strip():
                     yield current_chunk.strip()
                     current_chunk = ""
-                # 提取章节标题，作为新块的开始
+                # Extract chapter title as start of new chunk
                 match = re.match(r'(第[一二三四五六七八九十百千万\d]+章)', segment_stripped)
                 if match:
                     chapter_title = match.group(1)
-                    # 将章节标题作为新块的开始（确保后面有空格）
+                    # Use chapter title as start of new chunk (ensure space after)
                     current_chunk = chapter_title
-                    # 如果章节标题后面还有内容，继续处理
+                    # If there's content after chapter title, continue processing
                     remaining = segment_stripped[len(chapter_title):].strip()
                     if remaining:
-                        # 确保章节标题和后续内容之间有空格
+                        # Ensure space between chapter title and following content
                         if not current_chunk.endswith(' '):
                             current_chunk += ' '
                         segment = remaining
@@ -123,13 +123,13 @@ def read_file_chunks(file_path: str, chunk_size: int = 1000) -> Generator[str, N
                     else:
                         continue
                 else:
-                    # 如果匹配失败，直接处理整个段
+                    # If match fails, process entire segment directly
                     parts = re.split(r'([。！？])', segment)
             else:
-                # 不是章节标题，按句号、感叹号、问号分割文本（保留分隔符）
+                # Not a chapter title, split text by period, exclamation, question mark (preserve delimiters)
                 parts = re.split(r'([。！？])', segment)
         
-        # 处理文本部分（按句号分割）
+        # Process text parts (split by periods)
         
         i = 0
         while i < len(parts):
@@ -138,22 +138,22 @@ def read_file_chunks(file_path: str, chunk_size: int = 1000) -> Generator[str, N
                 i += 1
                 continue
             
-            # 如果当前部分是标点符号
+            # If current part is punctuation
             if part in ['。', '！', '？']:
                 if current_chunk:
                     current_chunk += part
-                    # 检查当前块是否达到或超过chunk_size
+                    # Check if current chunk reaches or exceeds chunk_size
                     if len(current_chunk) >= chunk_size:
                         yield current_chunk.strip()
                         current_chunk = ""
                 i += 1
                 continue
             
-            # 当前部分是文本内容
-            # 检查添加这个部分后是否超过chunk_size
+            # Current part is text content
+            # Check if adding this part exceeds chunk_size
             test_chunk = current_chunk + part if current_chunk else part
             
-            # 如果单个句子就超过chunk_size，直接输出
+            # If single sentence exceeds chunk_size, output directly
             if len(part) >= chunk_size:
                 if current_chunk.strip():
                     yield current_chunk.strip()
@@ -162,31 +162,31 @@ def read_file_chunks(file_path: str, chunk_size: int = 1000) -> Generator[str, N
                 i += 1
                 continue
             
-            # 检查添加后是否达到chunk_size
+            # Check if adding reaches chunk_size
             if len(test_chunk) >= chunk_size:
-                # 如果有下一个标点符号，先加上再输出
+                # If there's next punctuation, add it first then output
                 if i + 1 < len(parts) and parts[i + 1] in ['。', '！', '？']:
                     test_chunk += parts[i + 1]
                     yield test_chunk.strip()
                     current_chunk = ""
                     i += 2
                 else:
-                    # 没有标点符号，直接输出当前块
+                    # No punctuation, output current chunk directly
                     if current_chunk.strip():
                         yield current_chunk.strip()
                     current_chunk = part
                     i += 1
             else:
-                # 还没达到chunk_size，继续累积
+                # Not reached chunk_size yet, continue accumulating
                 current_chunk = test_chunk
-                # 如果有下一个标点符号，也加上
+                # If there's next punctuation, add it too
                 if i + 1 < len(parts) and parts[i + 1] in ['。', '！', '？']:
                     current_chunk += parts[i + 1]
                     i += 2
                 else:
                     i += 1
     
-    # 输出剩余的文本
+    # Output remaining text
     if current_chunk.strip():
         yield current_chunk.strip()
 
@@ -200,21 +200,21 @@ async def add_memory_batch(
     sender_name: Optional[str] = None,
 ) -> bool:
     """
-    使用 SDK 方式添加记忆到记忆库
+    Add memory to memory library using SDK approach
     
     Args:
-        chunk: 文本块内容
-        chunk_count: 块编号
-        group_id: 群组ID
-        group_name: 群组名称
-        sender: 发送者ID
-        sender_name: 发送者名称
+        chunk: Text chunk content
+        chunk_count: Chunk number
+        group_id: Group ID
+        group_name: Group name
+        sender: Sender ID
+        sender_name: Sender name
         
     Returns:
-        成功返回True，失败返回False
+        True on success, False on failure
     """
     try:
-        # 生成消息ID，包含块编号
+        # Generate message ID, including chunk number
         message_id = f"chunk_{chunk_count}_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
         
         memory = await client.v1.memories.create(
@@ -234,7 +234,7 @@ async def add_memory_batch(
 
 
 async def main() -> None:
-    """主函数"""
+    """Main function"""
     if len(sys.argv) < 2:
         print("用法: python batch_add_async.py <文件路径> [块大小] [起始块号] [最大块数]", file=sys.stderr)
         print("示例: python batch_add_async.py input.txt 1000", file=sys.stderr)
@@ -254,7 +254,7 @@ async def main() -> None:
     start_from = int(sys.argv[3]) if len(sys.argv) > 3 else 1
     max_blocks = int(sys.argv[4]) if len(sys.argv) > 4 else None
     
-    # 从环境变量读取配置，设置默认值
+    # Read configuration from environment variables, set default values
     group_id = os.getenv("EVERMEMOS_GROUP_ID", "group_123")
     group_name = os.getenv("EVERMEMOS_GROUP_NAME", "Project Discussion Group")
     sender = os.getenv("EVERMEMOS_SENDER", "user_001")
@@ -278,11 +278,11 @@ async def main() -> None:
     for chunk in read_file_chunks(file_path, chunk_size):
         chunk_count += 1
         
-        # 跳过前面的块
+        # Skip previous chunks
         if chunk_count < start_from:
             continue
         
-        # 检查是否达到最大处理块数
+        # Check if reached maximum processing block count
         if max_blocks is not None and processed_count >= max_blocks:
             break
         
@@ -294,7 +294,7 @@ async def main() -> None:
         print(f"内容预览: {chunk[:100]}..." if len(chunk) > 100 else f"内容: {chunk}")
         print("-" * 50)
         
-        # 调用 SDK 添加记忆
+        # Call SDK to add memory
         success = await add_memory_batch(
             chunk=chunk,
             chunk_count=chunk_count,
@@ -307,12 +307,12 @@ async def main() -> None:
         if success:
             success_count += 1
         else:
-            # 失败则记录进度并结束
+            # On failure, record progress and stop
             failed_at_chunk = chunk_count
             print(f"\n❌ 处理失败，已停止。成功处理 {success_count} 个块，失败于第 {failed_at_chunk} 个块", file=sys.stderr)
             break
     
-    # 输出统计信息
+    # Output statistics
     print("\n" + "=" * 50)
     if start_from > 1 and chunk_count > 0:
         skipped_count = start_from - 1

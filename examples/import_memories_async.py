@@ -14,74 +14,74 @@ client = AsyncEverMemOS(
 
 
 async def main() -> None:
-    # 批量导入历史消息
-    # 导入对话元数据和消息列表，消息会被加入处理队列
+    # Batch import historical messages
+    # Import conversation metadata and message list, messages will be added to processing queue
     group_id = os.environ.get("EVERMEMOS_GROUP_ID", "group_import_001")
     
-    # 检查 base_url 配置
+    # Check base_url configuration
     base_url = os.environ.get("EVER_MEM_OS_CLIENT_BASE_URL")
     if not base_url:
-        print("⚠️  警告: 未设置 EVER_MEM_OS_CLIENT_BASE_URL 环境变量")
-        print("   请确保 base_url 配置正确，且服务器端支持 /api/v1/memories/import 端点")
+        print("⚠️  Warning: EVER_MEM_OS_CLIENT_BASE_URL environment variable not set")
+        print("   Please ensure base_url is configured correctly and the server supports /api/v1/memories/import endpoint")
     else:
-        print(f"使用 base_url: {base_url}")
+        print(f"Using base_url: {base_url}")
     
     try:
         import_response = await client.v1.memories.load(
-        conversation_meta={
-            "group_id": group_id,
-            "name": "测试导入对话",
-            "scene": "group_chat",  # 或 "assistant"
-            "scene_desc": {
-                "description": "用于测试批量导入功能的对话",
-                "purpose": "测试",
-            },
-            "description": "这是一个测试批量导入功能的对话元数据",
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "default_timezone": "Asia/Shanghai",
-            "tags": ["测试", "导入"],
-            "user_details": {
-                "user_001": {
-                    "full_name": "用户一",
-                    "role": "user",
-                    "custom_role": "测试用户",
+            conversation_meta={
+                "group_id": group_id,
+                "name": "Test Import Conversation",
+                "scene": "group_chat",  # or "assistant"
+                "scene_desc": {
+                    "description": "Conversation for testing batch import functionality",
+                    "purpose": "Testing",
                 },
-                "user_002": {
-                    "full_name": "用户二",
-                    "role": "user",
-                    "custom_role": "测试用户",
+                "description": "This is a conversation metadata for testing batch import functionality",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "default_timezone": "Asia/Shanghai",
+                "tags": ["test", "import"],
+                "user_details": {
+                    "user_001": {
+                        "full_name": "User One",
+                        "role": "user",
+                        "custom_role": "Test User",
+                    },
+                    "user_002": {
+                        "full_name": "User Two",
+                        "role": "user",
+                        "custom_role": "Test User",
+                    },
                 },
             },
-        },
-        conversation_list=[
-            {
-                "message_id": f"msg_{int(datetime.now(timezone.utc).timestamp() * 1000)}_1",
-                "content": "这是第一条测试消息",
-                "create_time": datetime.now(timezone.utc).isoformat(),
-                "sender": "user_001",
-                "sender_name": "用户一",
-                "role": "user",
-                "type": "text",
-            },
-            {
-                "message_id": f"msg_{int(datetime.now(timezone.utc).timestamp() * 1000)}_2",
-                "content": "这是第二条测试消息，用于验证批量导入功能",
-                "create_time": datetime.now(timezone.utc).isoformat(),
-                "sender": "user_002",
-                "sender_name": "用户二",
-                "role": "user",
-                "type": "text",
-            },
-            {
-                "message_id": f"msg_{int(datetime.now(timezone.utc).timestamp() * 1000)}_3",
-                "content": "这是第三条测试消息",
-                "create_time": datetime.now(timezone.utc).isoformat(),
-                "sender": "user_001",
-                "sender_name": "用户一",
-                "role": "user",
-                "type": "text",
-            },
-        ],
+            conversation_list=[
+                {
+                    "message_id": f"msg_{int(datetime.now(timezone.utc).timestamp() * 1000)}_1",
+                    "content": "This is the first test message",
+                    "create_time": datetime.now(timezone.utc).isoformat(),
+                    "sender": "user_001",
+                    "sender_name": "User One",
+                    "role": "user",
+                    "type": "text",
+                },
+                {
+                    "message_id": f"msg_{int(datetime.now(timezone.utc).timestamp() * 1000)}_2",
+                    "content": "This is the second test message for verifying batch import functionality",
+                    "create_time": datetime.now(timezone.utc).isoformat(),
+                    "sender": "user_002",
+                    "sender_name": "User Two",
+                    "role": "user",
+                    "type": "text",
+                },
+                {
+                    "message_id": f"msg_{int(datetime.now(timezone.utc).timestamp() * 1000)}_3",
+                    "content": "This is the third test message",
+                    "create_time": datetime.now(timezone.utc).isoformat(),
+                    "sender": "user_001",
+                    "sender_name": "User One",
+                    "role": "user",
+                    "type": "text",
+                },
+            ],
             version="1.0.0",
         )
         
@@ -92,23 +92,53 @@ async def main() -> None:
         print(f"request_id: {import_response.request_id}")
         
         if import_response.request_id:
-            print(f"\n提示: 可以使用以下 request_id 查询处理状态:")
+            print(f"\nHint: You can use the following request_id to query processing status:")
             print(f"  request_id: {import_response.request_id}")
-            print(f"\n查询命令示例:")
+            print(f"\nExample query command:")
             print(f"  EVERMEMOS_REQUEST_ID={import_response.request_id} python get_request_status_async.py")
     
     except Exception as e:
-        print(f"\n❌ 错误: {type(e).__name__}")
-        print(f"   消息: {str(e)}")
+        print(f"\n❌ Error: {type(e).__name__}")
+        print(f"   Message: {str(e)}")
         
-        # 如果是 404 错误，提供更多帮助信息
-        if "404" in str(e) or "Not Found" in str(e):
-            print(f"\n💡 可能的解决方案:")
-            print(f"   1. 检查 EVER_MEM_OS_CLIENT_BASE_URL 是否正确配置")
-            print(f"   2. 确认服务器端是否支持 /api/v1/memories/import 端点")
-            print(f"   3. 检查 base_url 是否包含正确的协议 (http:// 或 https://)")
-            print(f"   4. 确认 base_url 末尾没有多余的斜杠")
-            print(f"\n   当前 base_url: {base_url or '(未设置)'}")
+        # Print detailed error information returned by server
+        if hasattr(e, 'response'):
+            print(f"\n📋 Server response details:")
+            print(f"   Status code: {e.response.status_code}")
+            print(f"   Request URL: {e.response.request.url}")
+            print(f"   Request method: {e.response.request.method}")
+            
+            # Print response headers
+            if e.response.headers:
+                print(f"\n   Response headers:")
+                for key, value in e.response.headers.items():
+                    print(f"     {key}: {value}")
+        
+        # Print response body
+        if hasattr(e, 'body'):
+            print(f"\n📄 Server response body:")
+            import json
+            if isinstance(e.body, dict):
+                print(f"   {json.dumps(e.body, indent=2, ensure_ascii=False)}")
+            elif isinstance(e.body, str):
+                print(f"   {e.body}")
+            else:
+                print(f"   {repr(e.body)}")
+        
+        # If it's a 404 error, provide more help information
+        if "404" in str(e) or "Not Found" in str(e) or (hasattr(e, 'status_code') and e.status_code == 404):
+            print(f"\n💡 Possible solutions:")
+            print(f"   1. Check if EVER_MEM_OS_CLIENT_BASE_URL is configured correctly")
+            print(f"   2. Confirm if the server supports /api/v1/memories/import endpoint")
+            print(f"      - This endpoint may not be available in some environments")
+            print(f"      - If the endpoint does not exist, consider using create() method to create memories one by one")
+            print(f"   3. Check if base_url contains the correct protocol (http:// or https://)")
+            print(f"   4. Confirm there is no trailing slash at the end of base_url")
+            print(f"\n   Current base_url: {base_url or '(not set)'}")
+            print(f"\n   Alternative solutions:")
+            print(f"   - If /api/v1/memories/import endpoint is not available, you can use add_async.py or batch_add_async.py")
+            print(f"   - First use create_meta_async.py to create conversation metadata")
+            print(f"   - Then use add_async.py to add messages one by one")
         
         raise
 

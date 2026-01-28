@@ -13,7 +13,7 @@ client = AsyncEverMemOS(
 
 
 async def main() -> None:
-    # 获取记忆
+    # Get memories
     memory_result = await client.v1.memories.get(
         extra_query={
             "user_id": "天下霸唱",
@@ -25,38 +25,38 @@ async def main() -> None:
     if memory_result.result:
         print(f"total_count: {memory_result.result.total_count}")
         if memory_result.result.memories:
-            print(f"找到 {len(memory_result.result.memories)} 条记忆")
-            for idx, memory in enumerate(memory_result.result.memories[:5], 1):  # 最多显示5条
-                print(f"\n记忆 {idx}:")
-                # 所有记忆类型都有 id
+            print(f"Found {len(memory_result.result.memories)} memories")
+            for idx, memory in enumerate(memory_result.result.memories[:5], 1):  # Show at most 5
+                print(f"\nMemory {idx}:")
+                # All memory types have id
                 if hasattr(memory, 'id') and memory.id:
                     print(f"  id: {memory.id}")
-                # 所有记忆类型都有 user_id
+                # All memory types have user_id
                 if hasattr(memory, 'user_id') and memory.user_id:
                     print(f"  user_id: {memory.user_id}")
-                # Profile 类型特有属性
+                # Profile type specific attributes
                 if hasattr(memory, 'profile_data') and memory.profile_data:
                     print(f"  profile_data: {memory.profile_data}")
                 if hasattr(memory, 'scenario') and memory.scenario:
                     print(f"  scenario: {memory.scenario}")
                 if hasattr(memory, 'confidence') and memory.confidence is not None:
                     print(f"  confidence: {memory.confidence}")
-                # EpisodicMemory 类型特有属性
+                # EpisodicMemory type specific attributes
                 if hasattr(memory, 'episode_id') and memory.episode_id:
                     print(f"  episode_id: {memory.episode_id}")
                 if hasattr(memory, 'title') and memory.title:
                     print(f"  title: {memory.title}")
                 if hasattr(memory, 'summary') and memory.summary:
                     print(f"  summary: {memory.summary}")
-                # EventLog 类型特有属性
+                # EventLog type specific attributes
                 if hasattr(memory, 'atomic_fact') and memory.atomic_fact:
                     print(f"  atomic_fact: {memory.atomic_fact}")
                 if hasattr(memory, 'event_type') and memory.event_type:
                     print(f"  event_type: {memory.event_type}")
-                # Foresight 类型特有属性
+                # Foresight type specific attributes
                 if hasattr(memory, 'content') and memory.content:
                     print(f"  content: {memory.content}")
-                # 通用属性
+                # Common attributes
                 if hasattr(memory, 'group_id') and memory.group_id:
                     print(f"  group_id: {memory.group_id}")
                 if hasattr(memory, 'group_name') and memory.group_name:
