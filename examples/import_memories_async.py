@@ -3,25 +3,13 @@ import asyncio
 from evermemos import AsyncEverMemOS
 from datetime import datetime, timezone
 
-client = AsyncEverMemOS(
-    api_key=os.environ.get(
-        "EVERMEMOS_API_KEY",
-    ),
-    base_url=os.environ.get(
-        "EVER_MEM_OS_CLIENT_BASE_URL",
-    ),
-)
+client = AsyncEverMemOS()
 
 
 async def main() -> None:
     # Batch import historical messages
     # Import conversation metadata and message list, messages will be added to processing queue
     group_id = os.environ.get("EVERMEMOS_GROUP_ID", "group_import_001")
-    
-    # Check base_url configuration
-    base_url = os.environ.get("EVER_MEM_OS_CLIENT_BASE_URL")
-    if base_url:
-        print(f"Using base_url: {base_url}\n")
     
     try:
         # Prepare conversation_meta dictionary

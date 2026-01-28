@@ -1,15 +1,7 @@
-import os
 import asyncio
 from evermemos import AsyncEverMemOS, NotFoundError
 
-client = AsyncEverMemOS(
-    api_key=os.environ.get(
-        "EVERMEMOS_API_KEY",
-    ),
-    base_url=os.environ.get(
-        "EVER_MEM_OS_CLIENT_BASE_URL",
-    ),
-)
+client = AsyncEverMemOS()
 
 
 async def main() -> None:

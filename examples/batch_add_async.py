@@ -14,10 +14,7 @@ from typing import Generator, Optional
 from datetime import datetime, timezone
 from evermemos import AsyncEverMemOS
 
-client = AsyncEverMemOS(
-    api_key=os.environ.get("EVERMEMOS_API_KEY"),
-    base_url=os.environ.get("EVER_MEM_OS_CLIENT_BASE_URL"),
-)
+client = AsyncEverMemOS()
 
 
 def normalize_text(text: str) -> str:
