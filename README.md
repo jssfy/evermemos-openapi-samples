@@ -16,6 +16,43 @@ export EVERMEMOS_API_KEY="your_api_key"
 export EVER_MEM_OS_CLIENT_BASE_URL="https://api.evermind.ai"
 ```
 
+## 快速开始
+
+### 使用 Makefile 运行所有测试
+
+项目提供了 Makefile 来方便地运行测试用例：
+
+```bash
+# 运行所有测试用例（除了 batch_add_async）
+make test
+
+# 运行单个测试用例
+make test-one SCRIPT=add_async.py
+
+# 运行批量添加测试（需要指定文件）
+make test-batch FILE=test.txt CHUNK_SIZE=1000
+
+# 查看帮助
+make help
+
+# 清理临时文件
+make clean
+```
+
+**注意**：
+- `make test` 会按顺序运行所有示例脚本
+- 如果任何一个脚本失败，后续脚本将不会执行
+- `batch_add_async.py` 需要文件参数，因此不包含在默认测试中
+
+### 手动运行单个示例
+
+也可以手动运行单个示例：
+
+```bash
+cd examples
+python add_async.py
+```
+
 ## 记忆（Memories）操作
 
 ### 创建记忆
@@ -57,6 +94,19 @@ export EVER_MEM_OS_CLIENT_BASE_URL="https://api.evermind.ai"
   - `EVERMEMOS_SENDER`: 发送者ID（默认: user_001）
   - `EVERMEMOS_SENDER_NAME`: 发送者名称（默认: User）
 
+#### `import_memories_async.py` - 批量导入历史记忆
+- **用途**: 一次性导入对话元数据和消息列表
+- **功能**: 使用 `/api/v1/memories/import` 端点批量导入历史对话数据
+- **特点**: 
+  - 使用 `extra_body` 参数确保 version 字段正确传递
+  - 一次性完成元数据和消息的导入
+  - 消息会被加入处理队列
+- **运行**: `python import_memories_async.py`
+- **环境变量**:
+  - `EVERMEMOS_API_KEY`: API密钥（必需）
+  - `EVER_MEM_OS_CLIENT_BASE_URL`: API地址（可选）
+  - `EVERMEMOS_GROUP_ID`: 群组ID（默认: group_import_001）
+
 ### 获取记忆
 
 #### `get_async.py` - 异步获取/列出记忆
@@ -86,10 +136,11 @@ export EVER_MEM_OS_CLIENT_BASE_URL="https://api.evermind.ai"
 #### `delete_async.py` - 异步删除记忆
 - **用途**: 使用异步客户端删除记忆
 - **功能**: 演示三种删除方式：
-  1. 根据 `event_id` 删除特定记忆
+  1. 根据 `event_id` 删除特定记忆（使用 extra_body）
   2. 根据 `user_id` 删除用户的所有记忆
   3. 根据 `user_id` 和 `group_id` 组合删除特定群组的记忆
 - **特点**: 支持多种删除条件组合
+- **注意**: SDK 的 `memory_id` 参数与后端的 `event_id` 不匹配，需要使用 `extra_body` 传递
 - **运行**: `python delete_async.py`
 
 ## 对话元数据（Conversation Meta）操作

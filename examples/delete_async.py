@@ -1,6 +1,6 @@
 import os
 import asyncio
-from evermemos import AsyncEverMemOS, NotFoundError
+from evermemos import AsyncEverMemOS, NotFoundError, UnprocessableEntityError
 from datetime import datetime, timezone
 
 client = AsyncEverMemOS(
@@ -15,14 +15,15 @@ client = AsyncEverMemOS(
 
 async def main() -> None:
     # Example 1: Delete memory by event_id
-    # Note: If event_id does not exist or has been deleted, NotFoundError will be raised
+    # Note: Backend API expects 'event_id', but SDK wraps it as 'memory_id'
+    # We use extra_body to pass the correct parameter to backend
     event_id = "6976cbf5c07e8a28d9fb069e"
     print("=" * 50)
     print("Example 1: Delete memory by event_id")
     print(f"event_id: {event_id}")
     try:
         delete_response = await client.v1.memories.delete(
-            event_id=event_id,
+            extra_body={"event_id": event_id},
         )
         print(f"Delete result - message: {delete_response.message}")
         print(f"Delete result - status: {delete_response.status}")
@@ -30,8 +31,8 @@ async def main() -> None:
             print(f"Deleted count: {delete_response.result.count}")
             if delete_response.result.filters:
                 print(f"Filters used: {delete_response.result.filters}")
-    except NotFoundError as e:
-        print(f"No matching memory found: {e}")
+    except (NotFoundError, UnprocessableEntityError) as e:
+        print(f"No matching memory found or invalid request: {e}")
         print("Hint: The event_id may not exist or has been deleted")
 
     # Example 2: Delete all memories for a specific user
@@ -46,8 +47,8 @@ async def main() -> None:
         print(f"Delete result - status: {delete_response.status}")
         if delete_response.result:
             print(f"Deleted count: {delete_response.result.count}")
-    except NotFoundError as e:
-        print(f"No matching memory found: {e}")
+    except (NotFoundError, UnprocessableEntityError) as e:
+        print(f"No matching memory found or invalid request: {e}")
         print("Hint: The user may have no memory records")
 
     # Example 3: Delete memories for a specific user in a specific group
@@ -63,8 +64,8 @@ async def main() -> None:
         print(f"Delete result - status: {delete_response.status}")
         if delete_response.result:
             print(f"Deleted count: {delete_response.result.count}")
-    except NotFoundError as e:
-        print(f"No matching memory found: {e}")
+    except (NotFoundError, UnprocessableEntityError) as e:
+        print(f"No matching memory found or invalid request: {e}")
         print("Hint: The user may have no memory records in the specified group")
 
 
