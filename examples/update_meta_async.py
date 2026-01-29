@@ -12,7 +12,6 @@ async def main() -> None:
     meta_response = await client.v1.memories.conversation_meta.update(
         group_id="group_project_123",  # Optional, if provided, update specific group, otherwise update default config
         name="Updated Project Discussion Group Name",
-        description="Updated description information",
         tags=["project", "collaboration", "development", "update"],
         default_timezone="Asia/Shanghai",
         scene_desc={

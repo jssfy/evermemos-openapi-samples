@@ -156,7 +156,9 @@ python add_async.py
   - 如果省略 `group_id` 则保存为场景的默认配置
 - **参数说明**:
   - `scene`: 场景类型（`group_chat` 或 `assistant`）
+  - `scene_desc`: 场景描述对象，可包含 `description`、`purpose` 等字段
   - `user_details`: 参与者详情，包括用户ID、姓名、角色等
+- **注意**: SDK 0.3.9 版本不支持顶层 `description` 参数，描述信息应放在 `scene_desc` 字典中
 - **运行**: `python create_meta_async.py`
 
 ### 获取对话元数据
@@ -178,9 +180,10 @@ python add_async.py
 - **用途**: 使用异步客户端部分更新对话元数据
 - **功能**:
   - 只更新提供的字段，未提供的字段保持不变
-  - 支持更新名称、描述、标签、时区、场景描述、用户详情等
+  - 支持更新名称、标签、时区、场景描述、用户详情等
   - 通过 `group_id` 定位要更新的元数据，不提供则更新默认配置
 - **特点**: 部分更新，不会覆盖未提供的字段
+- **注意**: SDK 0.3.9 版本不支持顶层 `description` 参数，描述信息应放在 `scene_desc` 字典中
 - **运行**: `python update_meta_async.py`
 
 ## 文件分类

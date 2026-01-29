@@ -19,7 +19,6 @@ async def main() -> None:
             "purpose": "Team collaboration",
         },
         group_id="group_project_123",  # Optional, if provided, targets a specific group
-        description="This is a metadata configuration for a project discussion group",
         default_timezone="Asia/Shanghai",
         tags=["project", "collaboration", "development"],
         user_details={
