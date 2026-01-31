@@ -9,8 +9,8 @@ memories = AsyncEverMemOS().v1.memories
 async def main() -> None:
     response = await memories.get(
         extra_query={
-            "user_id": "anhua_004",
-            # "memory_type": "profile",
+            "user_id": "user_011",
+            "memory_type": "episodic_memory",
         }
     )
 
