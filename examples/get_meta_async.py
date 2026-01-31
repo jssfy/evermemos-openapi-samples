@@ -1,3 +1,4 @@
+# EverMemOS should've been installed (pip install evermemos -U)
 import asyncio
 from evermemos import AsyncEverMemOS, NotFoundError
 

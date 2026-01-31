@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# EverMemOS should've been installed (pip install evermemos -U)
 """
 Batch add memories to EverMemOS
 Read file and split by periods, output and add to memory library each time exceeding specified character count
