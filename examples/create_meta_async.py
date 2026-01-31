@@ -13,11 +13,7 @@ async def main() -> None:
     meta_response = await client.v1.memories.conversation_meta.create(
         created_at=datetime.now(timezone.utc).isoformat(),
         name="Project Discussion Group",
-        scene="group_chat",  # or "assistant"
-        scene_desc={
-            "description": "Group for project collaboration and discussion",
-            "purpose": "Team collaboration",
-        },
+        # Do not pass scene_desc when group_id is set - scene is inherited from global config
         group_id="group_project_123",  # Optional, if provided, targets a specific group
         default_timezone="Asia/Shanghai",
         tags=["project", "collaboration", "development"],
