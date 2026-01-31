@@ -18,15 +18,9 @@ async def main() -> None:
         response = await memories.delete(
             extra_body={"event_id": event_id},
         )
-        print(f"Delete result - message: {response.message}")
-        print(f"Delete result - status: {response.status}")
-        if response.result:
-            print(f"Deleted count: {response.result.count}")
-            if response.result.filters:
-                print(f"Filters used: {response.result.filters}")
+        print(response)
     except (NotFoundError, UnprocessableEntityError) as e:
         print(f"No matching memory found or invalid request: {e}")
-        print("Hint: The event_id may not exist or has been deleted")
 
     # Example 2: Delete all memories for a specific user
     print("\n" + "=" * 50)
@@ -36,13 +30,9 @@ async def main() -> None:
         response = await memories.delete(
             user_id="user_001",
         )
-        print(f"Delete result - message: {response.message}")
-        print(f"Delete result - status: {response.status}")
-        if response.result:
-            print(f"Deleted count: {response.result.count}")
+        print(response)
     except (NotFoundError, UnprocessableEntityError) as e:
         print(f"No matching memory found or invalid request: {e}")
-        print("Hint: The user may have no memory records")
 
     # Example 3: Delete memories for a specific user in a specific group
     print("\n" + "=" * 50)
@@ -53,13 +43,9 @@ async def main() -> None:
             user_id="user_001",
             group_id="group_project_123",
         )
-        print(f"Delete result - message: {response.message}")
-        print(f"Delete result - status: {response.status}")
-        if response.result:
-            print(f"Deleted count: {response.result.count}")
+        print(response)
     except (NotFoundError, UnprocessableEntityError) as e:
         print(f"No matching memory found or invalid request: {e}")
-        print("Hint: The user may have no memory records in the specified group")
 
 
 if __name__ == "__main__":

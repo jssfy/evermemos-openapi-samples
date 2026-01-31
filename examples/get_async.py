@@ -1,7 +1,7 @@
 # EverMemOS should've been installed (pip install evermemos -U)
 import asyncio
 from evermemos import AsyncEverMemOS
-# from debug_helpers import print_dict
+from debug_helpers import print_dict
 
 memories = AsyncEverMemOS().v1.memories
 
@@ -9,13 +9,13 @@ memories = AsyncEverMemOS().v1.memories
 async def main() -> None:
     response = await memories.get(
         extra_query={
-            "user_id": "user_001",
-            "memory_type": "profile",
+            "user_id": "anhua_004",
+            # "memory_type": "profile",
         }
     )
 
-    print(response)
-    # print_dict(response)
+    # print(response)
+    print_dict(response)
 
 
 if __name__ == "__main__":

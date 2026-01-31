@@ -215,16 +215,19 @@ async def add_memory_batch(
         # Generate message ID, including chunk number
         message_id = f"chunk_{chunk_count}_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
         
-        response = await memories.create(
+        create_time = datetime.now(timezone.utc).isoformat()
+        sender_val = sender or "user_001"
+        response = await memories.add(
             content=chunk,
-            create_time=datetime.now(timezone.utc).isoformat(),
+            create_time=create_time,
             message_id=message_id,
-            sender=sender or "user_001",
+            sender=sender_val,
             sender_name=sender_name,
             group_id=group_id,
             group_name=group_name,
         )
         print(f"✓ 块 {chunk_count} 已成功添加到记忆库 (长度: {len(chunk)} 字符)")
+        print(f"  add 参数: content_len={len(chunk)}, create_time={create_time!r}, message_id={message_id!r}, sender={sender_val!r}, sender_name={sender_name!r}, group_id={group_id!r}, group_name={group_name!r}")
         return True
     except Exception as e:
         print(f"✗ 块 {chunk_count} 添加到记忆库失败: {e}", file=sys.stderr)

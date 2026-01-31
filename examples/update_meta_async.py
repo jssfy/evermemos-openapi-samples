@@ -6,10 +6,6 @@ conversation_meta = AsyncEverMemOS().v1.memories.conversation_meta
 
 
 async def main() -> None:
-    # Partially update conversation metadata
-    # Only update provided fields, unprovided fields remain unchanged
-    # Locate the conversation metadata to update by group_id
-    # If group_id is null or not provided, update the default configuration
     response = await conversation_meta.update(
         group_id="group_project_123",  # Optional, if provided, update specific group, otherwise update default config
         name="Updated Project Discussion Group Name",
@@ -36,15 +32,7 @@ async def main() -> None:
             },
         },
     )
-    print(f"Update result - message: {response.message}")
-    print(f"Update result - status: {response.status}")
-    if response.result:
-        print(f"Metadata ID: {response.result.id}")
-        print(f"Group ID: {response.result.group_id}")
-        if response.result.updated_fields:
-            print(f"Updated fields: {response.result.updated_fields}")
-        if response.result.updated_at:
-            print(f"Updated at: {response.result.updated_at}")
+    print(response)
 
 
 if __name__ == "__main__":
