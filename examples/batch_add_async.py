@@ -14,7 +14,7 @@ from typing import Generator, Optional
 from datetime import datetime, timezone
 from evermemos import AsyncEverMemOS
 
-client = AsyncEverMemOS()
+memories = AsyncEverMemOS().v1.memories
 
 
 def normalize_text(text: str) -> str:
@@ -214,7 +214,7 @@ async def add_memory_batch(
         # Generate message ID, including chunk number
         message_id = f"chunk_{chunk_count}_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
         
-        memory = await client.v1.memories.create(
+        response = await memories.create(
             content=chunk,
             create_time=datetime.now(timezone.utc).isoformat(),
             message_id=message_id,

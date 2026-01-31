@@ -1,29 +1,29 @@
 import asyncio
 from evermemos import AsyncEverMemOS
 
-client = AsyncEverMemOS()
+memories = AsyncEverMemOS().v1.memories
 
 
 async def main() -> None:
     # Get memories
-    memory_result = await client.v1.memories.get(
+    response = await memories.get(
         extra_query={
             "user_id": "天下霸唱",
             "memory_type": "profile",
         }
     )
-    print(f"message: {memory_result.message}")
-    print(f"status: {memory_result.status}")
+    print(f"message: {response.message}")
+    print(f"status: {response.status}")
     
-    if not memory_result.result:
+    if not response.result:
         return
     
-    print(f"total_count: {memory_result.result.total_count}")
+    print(f"total_count: {response.result.total_count}")
     
-    if not memory_result.result.memories:
+    if not response.result.memories:
         return
     
-    print(f"Found {len(memory_result.result.memories)} memories")
+    print(f"Found {len(response.result.memories)} memories")
     
     # Helper function to print field if exists and has value
     def print_field(memory, name: str):
@@ -31,7 +31,7 @@ async def main() -> None:
         if value:
             print(f"  {name}: {value}")
     
-    for idx, memory in enumerate(memory_result.result.memories[:5], 1):  # Show at most 5
+    for idx, memory in enumerate(response.result.memories[:5], 1):  # Show at most 5
         print(f"\nMemory {idx}:")
         
         # All memory types have id

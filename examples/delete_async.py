@@ -2,7 +2,7 @@ import asyncio
 from evermemos import AsyncEverMemOS, NotFoundError, UnprocessableEntityError
 from datetime import datetime, timezone
 
-client = AsyncEverMemOS()
+memories = AsyncEverMemOS().v1.memories
 
 
 async def main() -> None:
@@ -14,15 +14,15 @@ async def main() -> None:
     print("Example 1: Delete memory by event_id")
     print(f"event_id: {event_id}")
     try:
-        delete_response = await client.v1.memories.delete(
+        response = await memories.delete(
             extra_body={"event_id": event_id},
         )
-        print(f"Delete result - message: {delete_response.message}")
-        print(f"Delete result - status: {delete_response.status}")
-        if delete_response.result:
-            print(f"Deleted count: {delete_response.result.count}")
-            if delete_response.result.filters:
-                print(f"Filters used: {delete_response.result.filters}")
+        print(f"Delete result - message: {response.message}")
+        print(f"Delete result - status: {response.status}")
+        if response.result:
+            print(f"Deleted count: {response.result.count}")
+            if response.result.filters:
+                print(f"Filters used: {response.result.filters}")
     except (NotFoundError, UnprocessableEntityError) as e:
         print(f"No matching memory found or invalid request: {e}")
         print("Hint: The event_id may not exist or has been deleted")
@@ -32,13 +32,13 @@ async def main() -> None:
     print("Example 2: Delete all memories for a specific user")
     print("user_id: user_001")
     try:
-        delete_response = await client.v1.memories.delete(
+        response = await memories.delete(
             user_id="user_001",
         )
-        print(f"Delete result - message: {delete_response.message}")
-        print(f"Delete result - status: {delete_response.status}")
-        if delete_response.result:
-            print(f"Deleted count: {delete_response.result.count}")
+        print(f"Delete result - message: {response.message}")
+        print(f"Delete result - status: {response.status}")
+        if response.result:
+            print(f"Deleted count: {response.result.count}")
     except (NotFoundError, UnprocessableEntityError) as e:
         print(f"No matching memory found or invalid request: {e}")
         print("Hint: The user may have no memory records")
@@ -48,14 +48,14 @@ async def main() -> None:
     print("Example 3: Delete memories for a specific user in a specific group")
     print("user_id: user_001, group_id: group_project_123")
     try:
-        delete_response = await client.v1.memories.delete(
+        response = await memories.delete(
             user_id="user_001",
             group_id="group_project_123",
         )
-        print(f"Delete result - message: {delete_response.message}")
-        print(f"Delete result - status: {delete_response.status}")
-        if delete_response.result:
-            print(f"Deleted count: {delete_response.result.count}")
+        print(f"Delete result - message: {response.message}")
+        print(f"Delete result - status: {response.status}")
+        if response.result:
+            print(f"Deleted count: {response.result.count}")
     except (NotFoundError, UnprocessableEntityError) as e:
         print(f"No matching memory found or invalid request: {e}")
         print("Hint: The user may have no memory records in the specified group")

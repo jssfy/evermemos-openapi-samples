@@ -2,7 +2,7 @@ import os
 import asyncio
 from evermemos import AsyncEverMemOS
 
-client = AsyncEverMemOS()
+request_stats = AsyncEverMemOS().v1.stats.request
 
 
 async def main() -> None:
@@ -16,17 +16,17 @@ async def main() -> None:
         print("    request_id is usually obtained from responses of async operations like load, create, etc.")
         print()
     
-    request_status = await client.v1.stats.request.get(
+    response = await request_stats.get(
         request_id=request_id,
     )
     
-    print(f"message: {request_status.message}")
-    print(f"success: {request_status.success}")
-    print(f"found: {request_status.found}")
+    print(f"message: {response.message}")
+    print(f"success: {response.success}")
+    print(f"found: {response.found}")
     
-    if request_status.data:
+    if response.data:
         print(f"\nRequest status data:")
-        for key, value in request_status.data.items():
+        for key, value in response.data.items():
             print(f"  {key}: {value}")
     else:
         print("\nRequest status data: (none)")

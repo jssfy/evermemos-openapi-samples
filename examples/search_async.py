@@ -1,7 +1,7 @@
 import asyncio
 from evermemos import AsyncEverMemOS
 
-client = AsyncEverMemOS()
+memories = AsyncEverMemOS().v1.memories
 
 
 async def main() -> None:
@@ -17,7 +17,7 @@ async def main() -> None:
     # - Solution 1: Don't set user_id, only set group_id (recommended)
     # - Solution 2: Use extra_query (verified to work)
     
-    search_result = await client.v1.memories.search(
+    response = await memories.search(
         extra_query={
             "group_id": "0122_series_1",
             "memory_types": ["episodic_memory"],
@@ -26,16 +26,16 @@ async def main() -> None:
     )
     print("✓ Using extra_query succeeded")
     print("Search memory results:")
-    print(f"  message: {search_result.message}")
-    print(f"  status: {search_result.status}")
-    if search_result.result:
-        print(f"  total_count: {search_result.result.total_count}")
-        print(f"  has_more: {search_result.result.has_more}")
-        if search_result.result.memories and search_result.result.total_count > 0:
-            print(f"  Found {len(search_result.result.memories)} memory groups")
+    print(f"  message: {response.message}")
+    print(f"  status: {response.status}")
+    if response.result:
+        print(f"  total_count: {response.result.total_count}")
+        print(f"  has_more: {response.result.has_more}")
+        if response.result.memories and response.result.total_count > 0:
+            print(f"  Found {len(response.result.memories)} memory groups")
             # Print detailed information of all memories
             total_memories_count = 0
-            for idx, memory_group in enumerate(search_result.result.memories, 1):
+            for idx, memory_group in enumerate(response.result.memories, 1):
                 print(f"\n  Memory group {idx}:")
                 for group_id, memories in memory_group.items():
                     print(f"    Group ID: {group_id}")
@@ -51,12 +51,12 @@ async def main() -> None:
                             print(f"        - subject: {mem.subject}")
                         elif hasattr(mem, 'subject'):
                             print(f"        - subject: (empty)")
-            print(f"\n  Total displayed {total_memories_count} memories (total_count: {search_result.result.total_count})")
+            print(f"\n  Total displayed {total_memories_count} memories (total_count: {response.result.total_count})")
         
         # Print pending messages
-        if hasattr(search_result.result, 'pending_messages') and search_result.result.pending_messages:
-            print(f"\n  Pending messages ({len(search_result.result.pending_messages)}):")
-            for idx, msg in enumerate(search_result.result.pending_messages[:5], 1):  # Show at most 5
+        if hasattr(response.result, 'pending_messages') and response.result.pending_messages:
+            print(f"\n  Pending messages ({len(response.result.pending_messages)}):")
+            for idx, msg in enumerate(response.result.pending_messages[:5], 1):  # Show at most 5
                 print(f"\n  Message {idx}:")
                 print(f"    id: {msg.id}")
                 print(f"    message_id: {msg.message_id}")
