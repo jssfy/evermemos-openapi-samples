@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from evermemos import EverMemOS
 
-memories = EverMemOS().v1.memories
+memories = EverMemOS().v0.memories
 
 # ── Step 1: Store a Conversation ──────────────────────────────────────────────
 

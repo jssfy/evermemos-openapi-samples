@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from evermemos import AsyncEverMemOS
 
-memories = AsyncEverMemOS().v1.memories
+memories = AsyncEverMemOS().v0.memories
 
 
 async def main() -> None:

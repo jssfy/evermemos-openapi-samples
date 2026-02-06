@@ -3,7 +3,7 @@ import asyncio
 from evermemos import AsyncEverMemOS
 from debug_helpers import print_dict
 
-memories = AsyncEverMemOS().v1.memories
+memories = AsyncEverMemOS().v0.memories
 
 
 async def main() -> None:

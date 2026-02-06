@@ -2,7 +2,7 @@
 import asyncio
 from evermemos import AsyncEverMemOS, NotFoundError
 
-conversation_meta = AsyncEverMemOS().v1.memories.conversation_meta
+conversation_meta = AsyncEverMemOS().v0.memories.conversation_meta
 
 
 async def main() -> None:

@@ -4,8 +4,8 @@ from evermemos import EverMemOS
 from datetime import datetime, timezone
 
 client = EverMemOS()
-memories = client.v1.memories
-request_stats = client.v1.status.request
+memories = client.v0.memories
+request_stats = client.v0.status.request
 
 sender = "user_015"
 

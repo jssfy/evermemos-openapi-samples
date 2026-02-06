@@ -1,7 +1,7 @@
 # EverMemOS should've been installed (pip install evermemos -U)
 from evermemos import EverMemOS
 
-memories = EverMemOS().v1.memories
+memories = EverMemOS().v0.memories
 
 response = memories.add(
     content="I went to the dentist today. I was scared of the dentist.",

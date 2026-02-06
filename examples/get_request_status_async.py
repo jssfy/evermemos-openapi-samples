@@ -3,7 +3,7 @@ import os
 import asyncio
 from evermemos import AsyncEverMemOS
 
-request_stats = AsyncEverMemOS().v1.status.request
+request_stats = AsyncEverMemOS().v0.status.request
 
 
 async def main() -> None:

@@ -17,7 +17,7 @@ def store_message(group_id, message_id, sender, content):
         "sender_name": sender.replace("user_", "").title(),
         "content": content
     }
-    response = requests.post(f"{BASE_URL}/api/v1/memories", json=message, headers=headers)
+    response = requests.post(f"{BASE_URL}/api/v0/memories", json=message, headers=headers)
     return response.json()
 
 def search_memories(user_id, query):
@@ -29,7 +29,7 @@ def search_memories(user_id, query):
         "top_k": 5,
         "memory_types": ["episodic_memory", "profile_memory"]
     }
-    response = requests.get(f"{BASE_URL}/api/v1/memories/search", json=search_params, headers=headers)
+    response = requests.get(f"{BASE_URL}/api/v0/memories/search", json=search_params, headers=headers)
     return response.json()
 
 # Main flow
