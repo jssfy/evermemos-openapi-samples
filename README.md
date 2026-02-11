@@ -18,6 +18,20 @@ export EVER_MEM_OS_CLIENT_BASE_URL="https://api.evermind.ai"
 
 ## 快速开始
 
+### 环境初始化（使用 uv）
+
+项目使用 [uv](https://docs.astral.sh/uv/) 管理 Python 依赖和虚拟环境：
+
+```bash
+# 首次使用：初始化环境（自动创建 .venv 并安装依赖）
+make setup
+
+# 查看已安装的 evermemos 版本
+uv pip show evermemos --python .venv/bin/python
+```
+
+> 如果未安装 uv，请先安装：`brew install uv` 或 `pip install uv`
+
 ### 使用 Makefile 运行所有测试
 
 项目提供了 Makefile 来方便地运行测试用例：
@@ -46,9 +60,12 @@ make clean
 
 ### 手动运行单个示例
 
-也可以手动运行单个示例：
-
 ```bash
+# 使用 uv run（推荐，自动使用项目 .venv）
+uv run python examples/add_async.py
+
+# 或手动激活虚拟环境后运行
+source .venv/bin/activate
 cd examples
 python add_async.py
 ```

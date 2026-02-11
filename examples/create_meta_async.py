@@ -23,12 +23,12 @@ async def create_global_config() -> None:
         tags=["project", "collaboration"],
         llm_custom_setting={
             "boundary": {
-                "model": "gpt-4o-mini",
+                "model": "gpt-4.1-mini",
                 "provider": "openai",
             },
             "extraction": {
-                "model": "gpt-4o",
-                "provider": "openai",
+                "model": "qwen/qwen3-235b-a22b-2507",
+                "provider": "openrouter",
             },
         },
     )
@@ -36,16 +36,15 @@ async def create_global_config() -> None:
     print(response)
 
 
-async def create_group_config() -> None:
-    """Create group config (without llm_custom_setting).
-
-    Note: llm_custom_setting is NOT allowed for group config,
-    it inherits from the global config.
-    """
+async def create_config_with_user_details() -> None:
+    """Create config with user details and scene info."""
     response = await conversation_meta.create(
         created_at=datetime.now(timezone.utc).isoformat(),
-        name="Project Discussion Group",  # Required for group config
-        group_id="group_project_123",
+        scene="group_chat",
+        scene_desc={
+            "description": "Project discussion group chat",
+            "type": "project_discussion",
+        },
         default_timezone="Asia/Shanghai",
         tags=["project", "collaboration", "development"],
         user_details={
@@ -64,16 +63,16 @@ async def create_group_config() -> None:
             },
         },
     )
-    print("Group config created:")
+    print("Config with user details created:")
     print(response)
 
 
 async def main() -> None:
-    # First create global config with llm_custom_setting
+    # Create global config with llm_custom_setting
     await create_global_config()
 
-    # Then create group config (inherits llm_custom_setting from global)
-    await create_group_config()
+    # Create config with user details
+    await create_config_with_user_details()
 
 
 if __name__ == "__main__":

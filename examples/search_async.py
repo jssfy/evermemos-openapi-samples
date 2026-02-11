@@ -1,7 +1,7 @@
 # EverMemOS should've been installed (pip install evermemos -U)
 import asyncio
 from evermemos import AsyncEverMemOS
-from debug_helpers import print_dict
+from pprint import pprint
 
 memories = AsyncEverMemOS().v0.memories
 
@@ -18,7 +18,7 @@ async def main() -> None:
     )
 
     print(response)
-    # print_dict(response)
+    # pprint(response)
 
 if __name__ == "__main__":
     asyncio.run(main())
