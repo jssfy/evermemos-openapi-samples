@@ -4,11 +4,8 @@ version = "0.1.0"
 description = "EverMemOS OpenAPI SDK examples"
 requires-python = ">= 3.10"
 dependencies = [
-    "evermemos",
+    "evermemos==0.3.12",
 ]
 
 [tool.uv]
 managed = true
-
-[tool.uv.sources]
-evermemos = { url = "https://pkg.stainless.com/s/EverMemOS-python/211aed1b3d0d24a3250bcaf8aac93f88936f6d9c/evermemos-0.3.6-py3-none-any.whl" }

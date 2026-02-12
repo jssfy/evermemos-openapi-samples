@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10"
 
 [[package]]
@@ -45,8 +45,8 @@ wheels = [
 
 [[package]]
 name = "evermemos"
-version = "0.3.6"
-source = { url = "https://pkg.stainless.com/s/EverMemOS-python/211aed1b3d0d24a3250bcaf8aac93f88936f6d9c/evermemos-0.3.6-py3-none-any.whl" }
+version = "0.3.12"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "distro" },
@@ -55,22 +55,10 @@ dependencies = [
     { name = "sniffio" },
     { name = "typing-extensions" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/b9/87/4bfe488de95ce24c19185629533ad58f3500a2676ba08d964fb8239c2288/evermemos-0.3.12.tar.gz", hash = "sha256:720182ccc9b4b1b99c747c34509417622750845683f073367f40ef89fd5ea7ad", size = 230543, upload-time = "2026-02-12T02:26:18.131Z" }
 wheels = [
-    { url = "https://pkg.stainless.com/s/EverMemOS-python/211aed1b3d0d24a3250bcaf8aac93f88936f6d9c/evermemos-0.3.6-py3-none-any.whl", hash = "sha256:c8322a7928a4459c23e94958233c87d0b7e518b12cc9fb2d17fd6cff24abc06c" },
+    { url = "https://files.pythonhosted.org/packages/a9/06/388cdc1785817a37fcee41501fbfb464e814468da8fafbc7af43d066eef7/evermemos-0.3.12-py3-none-any.whl", hash = "sha256:043e62954857894d9fa8403ee14b0351bbe5ca3406e5a580d8dd7dcf11c01e33", size = 94139, upload-time = "2026-02-12T02:26:16.988Z" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiohttp", marker = "extra == 'aiohttp'" },
-    { name = "anyio", specifier = ">=3.5.0,<5" },
-    { name = "distro", specifier = ">=1.7.0,<2" },
-    { name = "httpx", specifier = ">=0.23.0,<1" },
-    { name = "httpx-aiohttp", marker = "extra == 'aiohttp'", specifier = ">=0.1.9" },
-    { name = "pydantic", specifier = ">=1.9.0,<3" },
-    { name = "sniffio" },
-    { name = "typing-extensions", specifier = ">=4.10,<5" },
-]
-provides-extras = ["aiohttp"]
 
 [[package]]
 name = "evermemos-openapi-samples"
@@ -81,7 +69,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "evermemos", url = "https://pkg.stainless.com/s/EverMemOS-python/211aed1b3d0d24a3250bcaf8aac93f88936f6d9c/evermemos-0.3.6-py3-none-any.whl" }]
+requires-dist = [{ name = "evermemos", specifier = "==0.3.12" }]
 
 [[package]]
 name = "exceptiongroup"

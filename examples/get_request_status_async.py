@@ -10,7 +10,7 @@ async def main() -> None:
     # Query request processing status
     # Note: request_id needs to be obtained from the response of previous async operations (such as load, create, etc.)
     # Here we use environment variable or example request_id, replace with real request_id when actually using
-    request_id = os.environ.get("EVERMEMOS_REQUEST_ID", "02176984059750700000000000000000000ffff0a1f5228984d93")
+    request_id = os.environ.get("EVERMEMOS_REQUEST_ID", "02177081084156800000000000000000000ffff0a1f5ed9392e28")
 
     response = await request_stats.get(
         request_id=request_id,

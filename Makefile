@@ -1,5 +1,16 @@
 .PHONY: test test-all clean help setup
 
+# 环境选择：make test-all ENV=dev (默认) | test | prod
+ENV ?= dev
+ENV_FILE := .env.$(ENV)
+
+ifneq ($(wildcard $(ENV_FILE)),)
+  include $(ENV_FILE)
+  export
+else
+  $(error 配置文件 $(ENV_FILE) 不存在。请复制 .env.example 并填写: cp .env.example $(ENV_FILE))
+endif
+
 # Python 运行命令（使用 uv 管理依赖和虚拟环境）
 PYTHON := uv run python
 
@@ -15,6 +26,7 @@ setup:
 # 运行所有测试用例
 test-all:
 	@echo "=========================================="
+	@echo "环境: $(ENV) | $(EVER_MEM_OS_BASE_URL)"
 	@echo "开始运行所有测试用例..."
 	@echo "=========================================="
 	@echo ""
@@ -104,16 +116,30 @@ help:
 	@echo "  make clean         - 清理临时文件"
 	@echo "  make help          - 显示此帮助信息"
 	@echo ""
-	@echo "环境变量："
-	@echo "  EVERMEMOS_API_KEY              - API密钥（必需）"
-	@echo "  EVER_MEM_OS_CLIENT_BASE_URL    - API地址"
+	@echo "环境选择（ENV 参数）："
+	@echo "  dev   - 开发环境（默认）"
+	@echo "  test  - 测试环境"
+	@echo "  prod  - 生产环境"
+	@echo ""
+	@echo "其他环境变量："
 	@echo "  EVERMEMOS_GROUP_ID             - 群组ID"
 	@echo "  EVERMEMOS_GROUP_NAME           - 群组名称"
 	@echo "  EVERMEMOS_SENDER               - 发送者ID"
 	@echo "  EVERMEMOS_SENDER_NAME          - 发送者名称"
 	@echo ""
+	@echo "配置文件："
+	@echo "  .env.dev      - 开发环境配置（默认加载）"
+	@echo "  .env.test     - 测试环境配置"
+	@echo "  .env.prod     - 生产环境配置"
+	@echo "  .env.example  - 配置模板（已提交 git）"
+	@echo ""
+	@echo "首次使用："
+	@echo "  cp .env.example .env.dev   # 复制模板并填写密钥"
+	@echo ""
 	@echo "示例："
-	@echo "  make setup                              # 首次使用"
-	@echo "  make test"
+	@echo "  make setup                              # 初始化依赖"
+	@echo "  make test                               # dev 环境（默认）"
+	@echo "  make test ENV=test                      # 测试环境"
+	@echo "  make test ENV=prod                      # 生产环境"
 	@echo "  make test-batch FILE=test.txt CHUNK_SIZE=500"
 	@echo "  make test-one SCRIPT=search_async.py"
