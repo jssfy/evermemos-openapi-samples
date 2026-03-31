@@ -16,6 +16,8 @@ export EVERMEMOS_API_KEY="your_api_key"
 export EVER_MEM_OS_CLIENT_BASE_URL="https://api.evermind.ai"
 ```
 
+## 测试环境版本历史
+
 ## 快速开始
 
 ### 环境初始化（使用 uv）

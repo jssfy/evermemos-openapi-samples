@@ -1,0 +1,205 @@
+# EverMemOS Python SDK v1 - 示例集
+
+基于 Stainless 生成的 Python SDK（`EverMemOS-python`），对应 OpenAPI 规范 `openapi.json`（2026-03-30 最新版）。
+
+## 版本记录
+
+| 日期 | Spec 文件 | 测试包安装命令 | `EVER_MEM_OS_BASE_URL` 可选值 |
+|------|-----------|--------------|-------------------------------|
+| 2026-03-30 | `docs/openapi-specs/openapi-0330.json` | `pip install 'https://pkg.stainless.com/s/EverMemOS-python/57e6f13222c8cadeb2744ed45d3c31c768835ff4/evermemos-0.3.6-py3-none-any.whl'` | `http://localhost:9527` · `https://dev-gateway.aws.evermind.ai` · `https://test-gateway.aws.evermind.ai` · `https://api.evermind.ai` |
+
+SDK 路径：`code/openapi/stainless/evermemos/sdks/EverMemOS-python`
+
+---
+
+## 对比文档
+
+- evermemos/memsys/v1-apis/api-diff-doc-vs-openapi-2026-03-22.md
+
+## 快速开始
+
+### 1. 安装 SDK
+
+```bash
+# 使用本地生成的 SDK（推荐，无需发布 PyPI）
+SDK_PATH="$(git rev-parse --show-toplevel)/code/openapi/stainless/evermemos/sdks/EverMemOS-python"
+pip install -e "$SDK_PATH"
+
+# 或从 PyPI 安装发布版（evermemos 0.3.6）
+pip install evermemos
+```
+
+### 2. 配置环境变量
+
+```bash
+export EVERMEMOS_API_KEY="your_api_key"
+
+# 覆盖接入点（SDK 读取 EVER_MEM_OS_BASE_URL，默认 https://api.evermind.ai）
+# 可选值（来自 openapi.json servers）：
+#   http://localhost:9527                  Local Gateway server
+#   https://dev-gateway.aws.evermind.ai   DEV environment
+#   https://test-gateway.aws.evermind.ai  TEST environment
+#   https://api.evermind.ai               Production（默认）
+export EVER_MEM_OS_BASE_URL="https://dev-gateway.aws.evermind.ai"
+```
+
+> **注意**：环境变量名是 `EVER_MEM_OS_BASE_URL`，不是 `EVERMEMOS_BASE_URL`。
+
+### 3. 运行示例
+
+```bash
+cd evermemos/backend/samples-on-sdk
+
+# 运行任意示例（需先配置 EVERMEMOS_API_KEY）
+python 01_add_sync.py
+python 04_search_sync.py
+```
+
+### 客户端初始化
+
+> **已知 SDK Bug**：`auth_headers` 未 override，`EVERMEMOS_API_KEY` 不会自动注入 `Authorization` 头。
+> 所有示例通过 `_client.py` 中的 `make_client()` workaround 手动传入 Bearer Token。
+
+```python
+# _client.py（样本集共用）
+import os
+from evermemos import EverMemOS, AsyncEverMemOS
+
+def make_client():
+    api_key = os.environ.get("EVERMEMOS_API_KEY", "")
+    return EverMemOS(default_headers={"Authorization": f"Bearer {api_key}"})
+
+# 各样本中使用：
+from _client import make_client, make_async_client
+client = make_client()        # 同步
+client = make_async_client()  # 异步
+```
+
+直接构造时：
+```python
+import os
+from evermemos import EverMemOS
+client = EverMemOS(
+    default_headers={"Authorization": f"Bearer {os.environ['EVERMEMOS_API_KEY']}"},
+    base_url="https://dev-gateway.aws.evermind.ai",  # 覆盖 EVER_MEM_OS_BASE_URL
+)
+
+# 异步客户端
+client = AsyncEverMemOS()
+
+# 资源入口（均通过 v1 命名空间）
+client.v1.memories          # 个人记忆
+client.v1.memories.agent    # Agent 轨迹记忆
+client.v1.memories.group    # 群组记忆
+client.v1.groups            # 群组管理
+client.v1.senders           # 发送者管理
+client.v1.settings          # 系统设置
+client.v1.object            # 文件预签名
+client.v1.tasks             # 异步任务状态
+```
+
+## 示例文件
+
+| 文件 | 说明 | 对应旧版 |
+|------|------|---------|
+| `01_add_sync.py` | 同步写入个人记忆 | `add_sync.py` |
+| `02_add_async.py` | 异步写入 + task 轮询 | `add_async.py` + `get_request_status_async.py` |
+| `03_get_sync.py` | 查询记忆（多类型 + 时间范围过滤） | `get_async.py` |
+| `04_search_sync.py` | 语义 / 关键字搜索（hybrid / vector / keyword） | `search_async.py` |
+| `05_delete_sync.py` | 按 ID / 批量删除记忆 | `delete_async.py` |
+| `06_flush_sync.py` | 手动触发会话边界提取 | `add_sync.py` (`flush=True`) |
+| `07_agent_memories.py` | Agent 轨迹记忆（含 tool_calls / null content） | 新功能 |
+| `08_group_memories.py` | 群组多人对话记忆 | 新功能 |
+| `09_groups_senders.py` | Groups / Senders / Settings CRUD | 新功能 |
+| `10_object_sign.py` | 文件批量预签名（v1 新批量 API） | 旧版单文件签名 |
+
+## 关键调用模式速查
+
+### 写入记忆
+
+```python
+# 个人记忆（同步）
+client.v1.memories.add(
+    user_id="user_010",
+    messages=[
+        {"role": "user", "timestamp": int(time.time() * 1000), "content": "..."},
+        {"role": "assistant", "timestamp": int(time.time() * 1000) + 500, "content": "..."},
+    ],
+)
+
+# 群组记忆（每条 message 必须有 sender_id）
+client.v1.memories.group.add(
+    group_id="group_001",
+    messages=[
+        {"role": "user", "sender_id": "alice", "timestamp": ..., "content": "..."},
+    ],
+)
+
+# 异步模式（返回 task_id，用 tasks.retrieve() 轮询）
+resp = client.v1.memories.add(user_id=..., messages=[...], async_mode=True)
+task_id = resp.data.task_id
+status_resp = client.v1.tasks.retrieve(task_id)
+```
+
+### 查询 / 搜索记忆
+
+```python
+# 按类型查询（filters DSL 支持 eq/in/gt/gte/lt/lte/AND/OR）
+client.v1.memories.get(
+    filters={"user_id": "user_010", "timestamp": {"gte": start_ms}},
+    memory_type="episodic_memory",   # episodic_memory | profile | agent_case | agent_skill
+)
+
+# 语义搜索
+client.v1.memories.search(
+    filters={"user_id": "user_010"},
+    query="outdoor activities",
+    method="hybrid",                 # hybrid | vector | keyword | agentic
+    top_k=5,
+)
+```
+
+### 触发记忆提取（flush）
+
+```python
+client.v1.memories.flush(user_id="user_010", session_id="session_abc")
+```
+
+### 文件批量预签名
+
+```python
+resp = client.v1.object.sign(
+    object_list=[
+        {"file_id": "f1", "file_name": "photo.png", "file_type": "image"},
+        {"file_id": "f2", "file_name": "doc.pdf",   "file_type": "file"},
+    ]
+)
+```
+
+### 错误处理
+
+```python
+from evermemos import BadRequestError, UnprocessableEntityError, AuthenticationError
+
+try:
+    client.v1.memories.add(...)
+except UnprocessableEntityError as e:   # 422 参数校验失败（v1 新错误码）
+    print(e.status_code, e.message)
+except AuthenticationError:             # 401 API Key 无效
+    ...
+```
+
+---
+
+## v0 → v1 主要变化
+
+| 维度 | v0 (旧 SDK) | v1 (新 SDK) |
+|------|-------------|-------------|
+| 客户端入口 | `client.v0.memories` | `client.v1.memories` |
+| 消息格式 | 单条扁平参数（content/sender） | `messages[]` 数组，每条含 role/timestamp/sender_id |
+| 搜索参数 | `extra_query={}` | `filters={...}` + `query=` 类型化参数 |
+| 过滤 DSL | 无结构 | `{user_id: X, timestamp: {gte: T}}` |
+| 异步任务 | `client.v0.status.request.get()` | `client.v1.tasks.retrieve(task_id)` |
+| 文件签名 | 单文件字段 | `object_list=[{file_id, file_name, file_type}]` |
+| 搜索方法 | keyword / vector / hybrid / rrf / agentic | keyword / vector / hybrid / agentic（rrf 已移除） |
+| 验证错误码 | 400 | 422 |

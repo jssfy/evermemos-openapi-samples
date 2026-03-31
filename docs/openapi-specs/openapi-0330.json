@@ -1,0 +1,3593 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "EverMemOS API",
+        "description": "Enterprise-grade intelligent memory system for AI agents. Extracts, structures, and retrieves information from conversations.",
+        "version": "1.0.0",
+        "contact": {
+            "name": "EverMemOS Team"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:9527",
+            "description": "Local Gateway server"
+        },
+        {
+            "url": "https://dev-gateway.aws.evermind.ai",
+            "description": "DEV environment"
+        },
+        {
+            "url": "https://test-gateway.aws.evermind.ai",
+            "description": "TEST environment"
+        },
+        {
+            "url": "https://api.evermind.ai",
+            "description": "Production"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Memories",
+            "description": "Memory ingestion, retrieval, search, and deletion"
+        },
+        {
+            "name": "Groups",
+            "description": "Group resource CRUD operations"
+        },
+        {
+            "name": "Senders",
+            "description": "Sender resource CRUD operations"
+        },
+        {
+            "name": "Settings",
+            "description": "Global settings management"
+        },
+        {
+            "name": "Tasks",
+            "description": "Async task status tracking"
+        },
+        {
+            "name": "Storage",
+            "description": "Multimodal content storage (pre-signed upload)"
+        }
+    ],
+    "paths": {
+        "/api/v1/memories": {
+            "post": {
+                "tags": [
+                    "Memories"
+                ],
+                "operationId": "addPersonalMemories",
+                "summary": "Store messages (personal)",
+                "description": "Store batch messages into personal memory space. Messages are accumulated and boundary detection triggers memory extraction automatically.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PersonalAddRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Messages accepted successfully (sync mode: async_mode=false)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddResponse"
+                                }
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "Messages queued for async processing (async_mode=true, default)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AsyncAddResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Request syntax error (malformed JSON, empty body, body size exceeded, missing required fields)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "missing_user_id": {
+                                        "summary": "Missing required user_id",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "user_id: Field required",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories"
+                                        }
+                                    },
+                                    "empty_messages": {
+                                        "summary": "Empty messages array",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "messages: List should have at least 1 item after validation",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values, business rule violations)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "content_validation": {
+                                        "summary": "Business semantic validation failure",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "content validation failed for role constraints",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "code": "InternalError",
+                                    "message": "Failed to store messages, please try again later",
+                                    "request_id": "unknown",
+                                    "timestamp": "2026-03-24T00:00:00+00:00",
+                                    "path": "/api/v1/memories"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/group": {
+            "post": {
+                "tags": [
+                    "Memories"
+                ],
+                "operationId": "addGroupMemories",
+                "summary": "Store messages (group)",
+                "description": "Store batch messages into group memory space. Each message must include sender_id to identify participants.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupAddRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Messages accepted successfully (sync mode: async_mode=false)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddResponse"
+                                }
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "Messages queued for async processing (async_mode=true, default)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AsyncAddResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Request syntax error (malformed JSON, empty body, body size exceeded, missing required fields)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "missing_sender_id": {
+                                        "summary": "Missing sender_id in group messages",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "messages[0].sender_id is required for group add",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories/group"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values, business rule violations)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/agent": {
+            "post": {
+                "tags": [
+                    "Memories"
+                ],
+                "operationId": "addAgentMemories",
+                "summary": "Store agent trajectory messages",
+                "description": "Store agent trajectory messages (user/assistant/tool) into memory. Supports tool_calls and tool_call_id for OpenAI-format function calling.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AgentAddRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Messages accepted successfully (sync mode: async_mode=false)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddResponse"
+                                }
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "Messages queued for async processing (async_mode=true, default)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AsyncAddResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Request syntax error (malformed JSON, empty body, body size exceeded, missing required fields)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values, business rule violations)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "tool_missing_tool_call_id": {
+                                        "summary": "role=tool without tool_call_id",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "tool_call_id is required when role is tool",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories/agent"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/flush": {
+            "post": {
+                "tags": [
+                    "Memories"
+                ],
+                "operationId": "flushPersonalMemories",
+                "summary": "Flush personal memories",
+                "description": "Trigger boundary detection on accumulated personal messages. If a boundary is detected, memory extraction is triggered immediately.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PersonalFlushRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Flush completed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FlushResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values, business rule violations)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/group/flush": {
+            "post": {
+                "tags": [
+                    "Memories"
+                ],
+                "operationId": "flushGroupMemories",
+                "summary": "Flush group memories",
+                "description": "Trigger boundary detection on accumulated group messages.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GroupFlushRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Flush completed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FlushResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values, business rule violations)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/agent/flush": {
+            "post": {
+                "tags": [
+                    "Memories"
+                ],
+                "operationId": "flushAgentMemories",
+                "summary": "Flush agent memories",
+                "description": "Trigger agent-aware boundary detection on accumulated agent trajectory messages. Extracts agent cases and skills when boundary is detected.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AgentFlushRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Flush completed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FlushResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values, business rule violations)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/get": {
+            "post": {
+                "tags": [
+                    "Memories"
+                ],
+                "operationId": "getMemories",
+                "summary": "Get memories with filters",
+                "description": "Retrieve structured memories using filters DSL with pagination. Supports episodic_memory, profile, agent_case, and agent_skill types.\n\n## Filters DSL\nAllowlist-based: only the following fields are processed, unknown fields are silently ignored.\n\n| Field | Type | Operators | Description |\n|-------|------|-----------|-------------|\n| `user_id` | string | eq, in | User ID filter (conditional required) |\n| `group_id` | string | eq, in | Group ID filter (conditional required) |\n| `session_id` | string | eq, in, gt, gte, lt, lte | Session ID filter |\n| `timestamp` | int (epoch ms/s) or ISO string | eq, gt, gte, lt, lte | Time range filter |\n| `AND` | array | - | All conditions must match |\n| `OR` | array | - | Any condition must match |\n\n**Operator syntax**: plain value = eq, `{\"in\": [...]}`, `{\"gte\": v, \"lt\": v}`",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GetMemRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Memories retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetMemoriesResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values, business rule violations)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "missing_scope": {
+                                        "summary": "Missing required scope filter",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "filters must contain at least one of 'user_id' or 'group_id' at first level",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories/get"
+                                        }
+                                    },
+                                    "invalid_memory_type": {
+                                        "summary": "Invalid memory_type",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "memory_type must be one of: agent_case, agent_skill, episodic_memory, profile",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories/get"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/search": {
+            "post": {
+                "tags": [
+                    "Memories"
+                ],
+                "operationId": "searchMemories",
+                "summary": "Search memories",
+                "description": "Unified memory search endpoint supporting multiple memory types and retrieval methods.\n\n## Retrieval Methods\n- **keyword**: BM25 keyword retrieval (Elasticsearch only)\n- **vector**: Vector semantic retrieval (Milvus only)\n- **hybrid** (default): Hybrid retrieval with rerank (ES + Milvus + Rerank)\n- **agentic**: LLM-guided multi-round intelligent retrieval\n\n## Memory Types\n- **episodic_memory**: Episodic memory (ES + Milvus)\n- **profile**: User profile (Milvus only)\n- **raw_message**: Raw unprocessed messages (ES only)\n- **agent_memory**: Agent memory - cases and skills (ES + Milvus)\n\n## Filters DSL\nSame syntax as the GET endpoint. Must contain at least one of `user_id` or `group_id`.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SearchMemoriesRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Search results returned",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SearchMemoriesResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values, business rule violations)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "missing_query": {
+                                        "summary": "Missing required query",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "query: Field required",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories/search"
+                                        }
+                                    },
+                                    "invalid_method": {
+                                        "summary": "Invalid retrieval method",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "Unknown method: foo. Built-in: agentic, hybrid, keyword, vector",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories/search"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/delete": {
+            "post": {
+                "tags": [
+                    "Memories"
+                ],
+                "operationId": "deleteMemories",
+                "summary": "Delete memories (soft delete)",
+                "description": "Soft delete memories by ID or by filter conditions.\n\nTwo mutually exclusive modes:\n- **By ID**: provide `memory_id` only (no other fields allowed)\n- **By filters**: provide `user_id` and/or `group_id` (session_id, sender_id optional)\n\nFilter semantics: omitted fields skip filtering; `null` or `\"\"` matches null/empty records; string value = exact match.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DeleteMemoriesRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Memories deleted successfully (no content)"
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values, business rule violations)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "mode_conflict": {
+                                        "summary": "memory_id with filter fields",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "When memory_id is provided, no other fields (user_id, group_id, session_id, sender_id) are allowed",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories/delete"
+                                        }
+                                    },
+                                    "missing_scope": {
+                                        "summary": "Missing required scope",
+                                        "value": {
+                                            "code": "InvalidParameter",
+                                            "message": "Either memory_id must be provided, or at least one of user_id / group_id is required",
+                                            "request_id": "unknown",
+                                            "timestamp": "2026-03-24T00:00:00+00:00",
+                                            "path": "/api/v1/memories/delete"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/groups": {
+            "post": {
+                "tags": [
+                    "Groups"
+                ],
+                "operationId": "createGroup",
+                "summary": "Create or update a group",
+                "description": "Create a new group or update an existing one (upsert by group_id).",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateGroupRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Group created/updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/groups/{group_id}": {
+            "get": {
+                "tags": [
+                    "Groups"
+                ],
+                "operationId": "getGroup",
+                "summary": "Get group by group_id",
+                "description": "Retrieve a group's details by its group_id.",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Group identifier",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "group_abc"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Group found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Group not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "code": "NotFound",
+                                    "message": "Group not found: group_abc",
+                                    "request_id": "unknown",
+                                    "timestamp": "2026-03-24T00:00:00+00:00",
+                                    "path": "/api/v1/groups/group_abc"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Groups"
+                ],
+                "operationId": "patchGroup",
+                "summary": "Partially update group",
+                "description": "Partially update a group's fields. At least one of name or description must be provided.",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Group identifier",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "group_abc"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchGroupRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Group updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GroupApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Group not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "code": "InvalidParameter",
+                                    "message": "At least one of 'name' or 'description' must be provided",
+                                    "request_id": "unknown",
+                                    "timestamp": "2026-03-24T00:00:00+00:00",
+                                    "path": "/api/v1/groups/group_abc"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/senders": {
+            "post": {
+                "tags": [
+                    "Senders"
+                ],
+                "operationId": "createSender",
+                "summary": "Create or update a sender",
+                "description": "Create a new sender or update an existing one (upsert by sender_id).",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateSenderRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sender created/updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SenderApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/senders/{sender_id}": {
+            "get": {
+                "tags": [
+                    "Senders"
+                ],
+                "operationId": "getSender",
+                "summary": "Get sender by sender_id",
+                "description": "Retrieve a sender's details by its sender_id.",
+                "parameters": [
+                    {
+                        "name": "sender_id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Sender identifier",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "user_123"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sender found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SenderApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sender not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Senders"
+                ],
+                "operationId": "patchSender",
+                "summary": "Partially update sender",
+                "description": "Update a sender's display name.",
+                "parameters": [
+                    {
+                        "name": "sender_id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Sender identifier",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "user_123"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchSenderRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sender updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SenderApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sender not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/{task_id}": {
+            "get": {
+                "tags": [
+                    "Tasks"
+                ],
+                "operationId": "getTaskStatus",
+                "summary": "Query task status",
+                "description": "Query the processing status of a specific async task by task_id. Task status is stored in Redis with a TTL of 1 hour. Internal status 'start' is mapped to 'processing' in the response.",
+                "parameters": [
+                    {
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Async task tracking ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Task status found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetTaskStatusResponse"
+                                },
+                                "examples": {
+                                    "processing": {
+                                        "summary": "Task is processing",
+                                        "value": {
+                                            "data": {
+                                                "task_id": "task_xyz",
+                                                "status": "processing"
+                                            }
+                                        }
+                                    },
+                                    "success": {
+                                        "summary": "Task completed successfully",
+                                        "value": {
+                                            "data": {
+                                                "task_id": "task_xyz",
+                                                "status": "success"
+                                            }
+                                        }
+                                    },
+                                    "failed": {
+                                        "summary": "Task failed",
+                                        "value": {
+                                            "data": {
+                                                "task_id": "task_xyz",
+                                                "status": "failed"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found or expired (TTL 1 hour)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Task data corrupted (status field missing)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/object/sign": {
+            "post": {
+                "tags": [
+                    "Storage"
+                ],
+                "operationId": "signObjectUpload",
+                "summary": "Get pre-signed upload URL",
+                "description": "Generate a pre-signed S3 upload URL for multimodal content. Gateway transparently forwards to MMS service with auto-injected mms-token header. Upload signature valid for 15 minutes, download signature valid for 7 days.\n\n**Note:** This endpoint is a transparent proxy to MMS. Request body must use `{objectList: [...]}` array wrapper. Response and error format follow MMS conventions (not the standard ErrorResponse schema used by other endpoints).",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ObjectSignRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pre-signed URL generated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ObjectSignResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "MMS validation error (status=200 with error field, MMS uses HTTP 200 for all responses)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ObjectSignResponse"
+                                },
+                                "example": {
+                                    "error": "参数验证失败",
+                                    "request_id": "uuid-here",
+                                    "status": 2018,
+                                    "result": {
+                                        "data": "objectList: non zero value required"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "MMS internal server error or Gateway proxy failure",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ObjectSignResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/settings": {
+            "get": {
+                "tags": [
+                    "Settings"
+                ],
+                "operationId": "getSettings",
+                "summary": "Get global settings",
+                "description": "Get the singleton global settings for this space.",
+                "responses": {
+                    "200": {
+                        "description": "Settings retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SettingsApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Settings not initialized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "example": {
+                                    "code": "NotFound",
+                                    "message": "Settings not found. Call PUT /api/v1/settings to initialize.",
+                                    "request_id": "unknown",
+                                    "timestamp": "2026-03-24T00:00:00+00:00",
+                                    "path": "/api/v1/settings"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Settings"
+                ],
+                "operationId": "updateSettings",
+                "summary": "Update or initialize global settings",
+                "description": "Update the global settings, or initialize them if they don't exist yet. Only provided fields are updated; omitted fields retain their current values.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateSettingsRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Settings updated/initialized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SettingsApiResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (invalid parameter values)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "security": [
+        {
+            "BearerAuth": []
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "API key as Bearer token. Obtain from console dashboard."
+            }
+        },
+        "schemas": {
+            "ErrorResponse": {
+                "type": "object",
+                "required": [
+                    "code",
+                    "message",
+                    "timestamp",
+                    "path"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Error code",
+                        "examples": [
+                            "InvalidParameter",
+                            "NotFound",
+                            "InternalError"
+                        ]
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Error message"
+                    },
+                    "request_id": {
+                        "type": "string",
+                        "description": "Request ID",
+                        "default": "unknown"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "description": "ISO 8601 timestamp"
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Request path"
+                    }
+                }
+            },
+            "ContentItem": {
+                "type": "object",
+                "required": [
+                    "type"
+                ],
+                "description": "Single content item in a message. This phase only supports type='text'.",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "Content type",
+                        "enum": [
+                            "text",
+                            "audio",
+                            "image",
+                            "doc",
+                            "pdf",
+                            "html",
+                            "email"
+                        ]
+                    },
+                    "text": {
+                        "description": "Content body. For type='text', this is the actual text.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "source": {
+                        "description": "Content source (e.g., google_doc, notion, confluence, zoom)",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "base64": {
+                        "description": "Base64-encoded content",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "uri": {
+                        "description": "File URI (MinIO, HTTP, etc.)",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "ext": {
+                        "description": "File extension (e.g., png, mp3, pdf)",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "description": "File name",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "source_info": {
+                        "description": "Source-related traceability info",
+                        "additionalProperties": true,
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    },
+                    "extras": {
+                        "description": "Type-specific extra fields",
+                        "additionalProperties": true,
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "MessageItem": {
+                "type": "object",
+                "required": [
+                    "role",
+                    "timestamp",
+                    "content"
+                ],
+                "description": "Single message item for personal memories. Content accepts a plain string shorthand: \"hello\" is coerced to [{\"type\": \"text\", \"text\": \"hello\"}].",
+                "properties": {
+                    "sender_id": {
+                        "description": "Sender identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "Message sender role",
+                        "enum": [
+                            "user",
+                            "assistant"
+                        ]
+                    },
+                    "timestamp": {
+                        "type": "integer",
+                        "description": "Message timestamp in unix milliseconds"
+                    },
+                    "content": {
+                        "description": "Content items array, or plain string shorthand",
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/ContentItem"
+                                },
+                                "minItems": 1
+                            }
+                        ]
+                    }
+                }
+            },
+            "GroupMessageItem": {
+                "type": "object",
+                "required": [
+                    "role",
+                    "timestamp",
+                    "content",
+                    "sender_id"
+                ],
+                "description": "Single message item for group memories. Each message must include sender_id to identify participants.",
+                "properties": {
+                    "message_id": {
+                        "description": "Message unique ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "sender_id": {
+                        "type": "string",
+                        "description": "Sender identifier (required for group)"
+                    },
+                    "sender_name": {
+                        "description": "Sender display name",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "Message sender role",
+                        "enum": [
+                            "user",
+                            "assistant"
+                        ]
+                    },
+                    "timestamp": {
+                        "type": "integer",
+                        "description": "Message timestamp in unix milliseconds"
+                    },
+                    "content": {
+                        "description": "Content items array, or plain string shorthand",
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/ContentItem"
+                                },
+                                "minItems": 1
+                            }
+                        ]
+                    }
+                }
+            },
+            "ToolCallFunction": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "arguments"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Function/tool name"
+                    },
+                    "arguments": {
+                        "type": "string",
+                        "description": "JSON-encoded arguments string"
+                    }
+                }
+            },
+            "ToolCall": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "function"
+                ],
+                "description": "OpenAI-format tool call made by the assistant",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique tool call ID"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Tool call type",
+                        "default": "function"
+                    },
+                    "function": {
+                        "$ref": "#/components/schemas/ToolCallFunction"
+                    }
+                }
+            },
+            "AgentMessageItem": {
+                "type": "object",
+                "required": [
+                    "role",
+                    "timestamp"
+                ],
+                "description": "Agent trajectory message. Supports role='tool' in addition to 'user'/'assistant'. Does not support message_id or sender_name (stripped by Gateway).",
+                "properties": {
+                    "role": {
+                        "type": "string",
+                        "description": "Message sender role",
+                        "enum": [
+                            "user",
+                            "assistant",
+                            "tool"
+                        ]
+                    },
+                    "timestamp": {
+                        "type": "integer",
+                        "description": "Message timestamp in unix milliseconds"
+                    },
+                    "content": {
+                        "description": "Message content. Conditional requirement by role:\n- role='user': required, must not be empty\n- role='assistant' with tool_calls: optional, can be null/empty/omitted (OpenAI compatible)\n- role='assistant' without tool_calls: required, must not be empty\n- role='tool': required (tool execution result)",
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/ContentItem"
+                                },
+                                "minItems": 1
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "sender_id": {
+                        "description": "Sender identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "tool_calls": {
+                        "description": "Tool calls made by assistant (OpenAI format). Only when role='assistant'.",
+                        "items": {
+                            "$ref": "#/components/schemas/ToolCall"
+                        },
+                        "type": [
+                            "array",
+                            "null"
+                        ]
+                    },
+                    "tool_call_id": {
+                        "description": "ID of the tool call this message responds to. Required when role='tool'.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "PersonalAddRequest": {
+                "type": "object",
+                "required": [
+                    "user_id",
+                    "messages"
+                ],
+                "properties": {
+                    "user_id": {
+                        "type": "string",
+                        "description": "Owner user ID"
+                    },
+                    "session_id": {
+                        "description": "Session identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "messages": {
+                        "type": "array",
+                        "description": "Batch message array (1-500 items)",
+                        "items": {
+                            "$ref": "#/components/schemas/MessageItem"
+                        },
+                        "minItems": 1,
+                        "maxItems": 500
+                    },
+                    "async_mode": {
+                        "type": "boolean",
+                        "description": "Enable async processing. When true, returns 202 with task_id; when false, processes synchronously and returns 200.",
+                        "default": true
+                    }
+                }
+            },
+            "GroupAddRequest": {
+                "type": "object",
+                "required": [
+                    "group_id",
+                    "messages"
+                ],
+                "description": "Each message must include sender_id for group conversations.",
+                "properties": {
+                    "group_id": {
+                        "type": "string",
+                        "description": "Group identifier"
+                    },
+                    "group_meta": {
+                        "description": "Group metadata",
+                        "additionalProperties": true,
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    },
+                    "messages": {
+                        "type": "array",
+                        "description": "Batch message array (1-500 items). sender_id is required per message.",
+                        "items": {
+                            "$ref": "#/components/schemas/GroupMessageItem"
+                        },
+                        "minItems": 1,
+                        "maxItems": 500
+                    },
+                    "async_mode": {
+                        "type": "boolean",
+                        "description": "Enable async processing. When true, returns 202 with task_id; when false, processes synchronously and returns 200.",
+                        "default": true
+                    }
+                }
+            },
+            "AgentAddRequest": {
+                "type": "object",
+                "required": [
+                    "user_id",
+                    "messages"
+                ],
+                "properties": {
+                    "user_id": {
+                        "type": "string",
+                        "description": "Owner user ID"
+                    },
+                    "session_id": {
+                        "description": "Session identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "messages": {
+                        "type": "array",
+                        "description": "Agent trajectory messages (1-500 items)",
+                        "items": {
+                            "$ref": "#/components/schemas/AgentMessageItem"
+                        },
+                        "minItems": 1,
+                        "maxItems": 500
+                    },
+                    "async_mode": {
+                        "type": "boolean",
+                        "description": "Enable async processing. When true, returns 202 with task_id; when false, processes synchronously and returns 200.",
+                        "default": true
+                    }
+                }
+            },
+            "PersonalFlushRequest": {
+                "type": "object",
+                "required": [
+                    "user_id"
+                ],
+                "properties": {
+                    "user_id": {
+                        "type": "string",
+                        "description": "Owner user ID"
+                    },
+                    "session_id": {
+                        "description": "Target session",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "GroupFlushRequest": {
+                "type": "object",
+                "required": [
+                    "group_id"
+                ],
+                "properties": {
+                    "group_id": {
+                        "type": "string",
+                        "description": "Target group"
+                    }
+                }
+            },
+            "AgentFlushRequest": {
+                "type": "object",
+                "required": [
+                    "user_id"
+                ],
+                "properties": {
+                    "user_id": {
+                        "type": "string",
+                        "description": "Owner user ID"
+                    },
+                    "session_id": {
+                        "description": "Target session",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "AddResult": {
+                "type": "object",
+                "properties": {
+                    "task_id": {
+                        "type": "string",
+                        "description": "Task tracking ID",
+                        "default": ""
+                    },
+                    "message_count": {
+                        "type": "integer",
+                        "description": "Number of messages accepted",
+                        "default": 0
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Processing status",
+                        "enum": [
+                            "accumulated",
+                            "extracted"
+                        ],
+                        "default": "accumulated"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Human-readable status description",
+                        "default": "Messages accepted"
+                    }
+                }
+            },
+            "AddResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/AddResult"
+                    }
+                }
+            },
+            "AsyncAddResult": {
+                "type": "object",
+                "properties": {
+                    "task_id": {
+                        "type": "string",
+                        "description": "Async task tracking ID"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Always 'queued' for async mode",
+                        "enum": [
+                            "queued"
+                        ],
+                        "default": "queued"
+                    },
+                    "message_count": {
+                        "type": "integer",
+                        "description": "Number of messages accepted",
+                        "default": 0
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Human-readable status description",
+                        "default": "Message accepted and queued for processing"
+                    }
+                }
+            },
+            "AsyncAddResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/AsyncAddResult"
+                    }
+                }
+            },
+            "TaskStatusResult": {
+                "type": "object",
+                "required": [
+                    "task_id",
+                    "status"
+                ],
+                "properties": {
+                    "task_id": {
+                        "type": "string",
+                        "description": "Async task tracking ID"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Task status",
+                        "enum": [
+                            "processing",
+                            "success",
+                            "failed"
+                        ]
+                    }
+                }
+            },
+            "GetTaskStatusResponse": {
+                "type": "object",
+                "required": [
+                    "data"
+                ],
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/TaskStatusResult"
+                    }
+                }
+            },
+            "FlushResult": {
+                "type": "object",
+                "properties": {
+                    "request_id": {
+                        "type": "string",
+                        "description": "Request tracking ID (reserved)",
+                        "default": ""
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Processing status",
+                        "enum": [
+                            "extracted",
+                            "no_extraction"
+                        ],
+                        "default": "no_extraction"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Human-readable status description",
+                        "default": "Flush completed"
+                    }
+                }
+            },
+            "FlushResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/FlushResult"
+                    }
+                }
+            },
+            "GetMemRequest": {
+                "type": "object",
+                "required": [
+                    "memory_type",
+                    "filters"
+                ],
+                "properties": {
+                    "memory_type": {
+                        "type": "string",
+                        "description": "Memory type to query. Scope constraint per type:\n- episodic_memory: supports both user_id and group_id\n- profile: user_id only (group_id will return 400)\n- agent_case: user_id only (group_id will return 400)\n- agent_skill: user_id only (group_id will return 400)",
+                        "enum": [
+                            "episodic_memory",
+                            "profile",
+                            "agent_case",
+                            "agent_skill"
+                        ]
+                    },
+                    "filters": {
+                        "type": "object",
+                        "description": "Filter conditions. Must contain user_id or group_id (see memory_type for scope constraints). Supports operators: eq (implicit), in, gt, gte, lt, lte. Combinators: AND, OR.",
+                        "additionalProperties": true
+                    },
+                    "page": {
+                        "type": "integer",
+                        "description": "Page number (starts from 1)",
+                        "default": 1,
+                        "minimum": 1
+                    },
+                    "page_size": {
+                        "type": "integer",
+                        "description": "Items per page",
+                        "default": 20,
+                        "minimum": 1,
+                        "maximum": 100
+                    },
+                    "rank_by": {
+                        "type": "string",
+                        "description": "Sort field",
+                        "default": "timestamp"
+                    },
+                    "rank_order": {
+                        "type": "string",
+                        "description": "Sort order",
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "default": "desc"
+                    }
+                }
+            },
+            "EpisodeItem": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "description": "Episodic memory item",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "user_id": {
+                        "description": "Owner user ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "session_id": {
+                        "description": "Session identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "timestamp": {
+                        "format": "date-time",
+                        "description": "Event occurrence time",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "participants": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Event participant names",
+                        "type": [
+                            "array",
+                            "null"
+                        ]
+                    },
+                    "sender_ids": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Sender IDs of event participants",
+                        "type": [
+                            "array",
+                            "null"
+                        ]
+                    },
+                    "summary": {
+                        "description": "Memory summary",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "subject": {
+                        "description": "Memory subject",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "episode": {
+                        "description": "Full episodic memory text",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "type": {
+                        "description": "Episode type",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_type": {
+                        "description": "Parent memory type",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_id": {
+                        "description": "Parent memory ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "ProfileItem": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "description": "User profile item",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "user_id": {
+                        "description": "User ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "profile_data": {
+                        "description": "Profile data (explicit_info, implicit_traits)",
+                        "additionalProperties": true,
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    },
+                    "scenario": {
+                        "description": "Scenario type: solo or team",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "memcell_count": {
+                        "description": "Number of MemCells",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "AgentCaseItem": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "description": "Agent case item (task experience)",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "user_id": {
+                        "description": "User ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "session_id": {
+                        "description": "Session identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "task_intent": {
+                        "description": "Rewritten task intent as retrieval key",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "approach": {
+                        "description": "Step-by-step approach with decisions and lessons",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "quality_score": {
+                        "description": "Task completion quality score (0.0-1.0)",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "timestamp": {
+                        "format": "date-time",
+                        "description": "Task occurrence time",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_type": {
+                        "description": "Parent memory type",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_id": {
+                        "description": "Parent memory ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "AgentSkillItem": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "description": "Agent skill item (reusable skill from clustered cases)",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "user_id": {
+                        "description": "User ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "cluster_id": {
+                        "description": "MemScene cluster ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "description": "Skill name",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "description": {
+                        "description": "What this skill does and when to use it",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "content": {
+                        "description": "Full skill content",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "confidence": {
+                        "description": "Confidence score (0.0-1.0)",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "maturity_score": {
+                        "description": "Maturity score (0.0-1.0)",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "source_case_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Source AgentCase IDs",
+                        "default": []
+                    }
+                }
+            },
+            "GetMemResponse": {
+                "type": "object",
+                "description": "Memory get result data",
+                "properties": {
+                    "episodes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EpisodeItem"
+                        },
+                        "default": [],
+                        "description": "Episodic memory items"
+                    },
+                    "profiles": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProfileItem"
+                        },
+                        "default": [],
+                        "description": "Profile items"
+                    },
+                    "agent_cases": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AgentCaseItem"
+                        },
+                        "default": [],
+                        "description": "Agent case items"
+                    },
+                    "agent_skills": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AgentSkillItem"
+                        },
+                        "default": [],
+                        "description": "Agent skill items"
+                    },
+                    "total_count": {
+                        "type": "integer",
+                        "description": "Total records matching filters",
+                        "default": 0
+                    },
+                    "count": {
+                        "type": "integer",
+                        "description": "Records in current page",
+                        "default": 0
+                    }
+                }
+            },
+            "GetMemoriesResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/GetMemResponse"
+                    }
+                }
+            },
+            "SearchMemoriesRequest": {
+                "type": "object",
+                "required": [
+                    "query",
+                    "filters"
+                ],
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query text",
+                        "examples": [
+                            "What did Alice say about the project?"
+                        ]
+                    },
+                    "method": {
+                        "type": "string",
+                        "description": "Retrieval method",
+                        "enum": [
+                            "keyword",
+                            "vector",
+                            "hybrid",
+                            "agentic"
+                        ],
+                        "default": "hybrid"
+                    },
+                    "memory_types": {
+                        "type": "array",
+                        "description": "Memory types to search",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "episodic_memory",
+                                "profile",
+                                "raw_message",
+                                "agent_memory"
+                            ]
+                        },
+                        "default": [
+                            "episodic_memory",
+                            "profile"
+                        ]
+                    },
+                    "top_k": {
+                        "type": "integer",
+                        "description": "Max results. -1 = return all meeting threshold (up to 100)",
+                        "default": -1,
+                        "minimum": -1,
+                        "maximum": 100
+                    },
+                    "radius": {
+                        "description": "COSINE similarity threshold (0.0-1.0) for vector methods",
+                        "minimum": 0.0,
+                        "maximum": 1.0,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "include_original_data": {
+                        "type": "boolean",
+                        "description": "Whether to return original data",
+                        "default": false
+                    },
+                    "filters": {
+                        "type": "object",
+                        "description": "Filter conditions. Must contain user_id or group_id (agent_memory and profile require user_id only, same scope constraints as GET endpoint). Same DSL as GET endpoint.",
+                        "additionalProperties": true
+                    }
+                }
+            },
+            "SearchEpisodeItem": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "description": "Episode search result with relevance score",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "user_id": {
+                        "description": "Owner user ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "session_id": {
+                        "description": "Session identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "timestamp": {
+                        "format": "date-time",
+                        "description": "Event occurrence time",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "participants": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Event participant names",
+                        "type": [
+                            "array",
+                            "null"
+                        ]
+                    },
+                    "summary": {
+                        "description": "Memory summary",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "subject": {
+                        "description": "Memory subject",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "episode": {
+                        "description": "Full episodic memory text",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "type": {
+                        "description": "Episode type",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_type": {
+                        "description": "Parent memory type",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_id": {
+                        "description": "Parent memory ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "score": {
+                        "description": "Relevance score",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "atomic_facts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SearchAtomicFactItem"
+                        },
+                        "default": [],
+                        "description": "Atomic facts expanded from this episode"
+                    }
+                }
+            },
+            "SearchAtomicFactItem": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "description": "Atomic fact expanded from an episode",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "user_id": {
+                        "description": "User ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "session_id": {
+                        "description": "Session identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "atomic_fact": {
+                        "description": "Atomic fact content",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "timestamp": {
+                        "format": "date-time",
+                        "description": "Event occurrence time",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "participants": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Related participant IDs",
+                        "type": [
+                            "array",
+                            "null"
+                        ]
+                    },
+                    "parent_type": {
+                        "description": "Parent memory type",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_id": {
+                        "description": "Parent memory ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "score": {
+                        "description": "Relevance score",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "parent_episode_id": {
+                        "description": "Source episode ID (MRAG expansion)",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "original_text": {
+                        "description": "Original text from parent episode",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "SearchProfileItem": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "description": "Profile search result with relevance score",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "user_id": {
+                        "description": "User ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "profile_data": {
+                        "additionalProperties": true,
+                        "description": "Profile data (explicit_info, implicit_traits)",
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    },
+                    "scenario": {
+                        "description": "Scenario type: solo or team",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "memcell_count": {
+                        "description": "Number of MemCells",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "score": {
+                        "description": "Relevance score",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "RawMessageDTO": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "request_id"
+                ],
+                "description": "Raw unprocessed message waiting for memory extraction",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "request_id": {
+                        "type": "string",
+                        "description": "Request ID"
+                    },
+                    "message_id": {
+                        "description": "Message ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "session_id": {
+                        "description": "Session identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "sender_id": {
+                        "description": "Sender ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "sender_name": {
+                        "description": "Sender name",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "content_items": {
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "type": [
+                            "array",
+                            "null"
+                        ]
+                    },
+                    "timestamp": {
+                        "description": "ISO 8601 format",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "created_at": {
+                        "description": "ISO 8601 format",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "updated_at": {
+                        "description": "ISO 8601 format",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "SearchAgentCaseItem": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "description": "Agent case search result with relevance score",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "user_id": {
+                        "description": "User ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "session_id": {
+                        "description": "Session identifier",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "task_intent": {
+                        "description": "Rewritten task intent as retrieval key",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "approach": {
+                        "description": "Step-by-step approach with decisions and lessons",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "quality_score": {
+                        "description": "Task completion quality score (0.0-1.0)",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "timestamp": {
+                        "format": "date-time",
+                        "description": "Task occurrence time",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_type": {
+                        "description": "Parent memory type",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "parent_id": {
+                        "description": "Parent memory ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "score": {
+                        "description": "Relevance score",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "SearchAgentSkillItem": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "description": "Agent skill search result with relevance score",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "MongoDB ObjectId as string"
+                    },
+                    "user_id": {
+                        "description": "User ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "cluster_id": {
+                        "description": "MemScene cluster ID",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "description": "Skill name",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "description": {
+                        "description": "What this skill does and when to use it",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "content": {
+                        "description": "Full skill content",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "confidence": {
+                        "description": "Confidence score (0.0-1.0)",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "maturity_score": {
+                        "description": "Maturity score (0.0-1.0)",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "source_case_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": [],
+                        "description": "Source AgentCase IDs"
+                    },
+                    "score": {
+                        "description": "Relevance score",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "AgentMemorySearchResult": {
+                "type": "object",
+                "description": "Agent memory search results (cases + skills)",
+                "properties": {
+                    "cases": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SearchAgentCaseItem"
+                        },
+                        "default": [],
+                        "description": "Agent case search results"
+                    },
+                    "skills": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SearchAgentSkillItem"
+                        },
+                        "default": [],
+                        "description": "Agent skill search results"
+                    }
+                }
+            },
+            "SearchQueryInfo": {
+                "type": "object",
+                "required": [
+                    "text",
+                    "method"
+                ],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "Search query text"
+                    },
+                    "method": {
+                        "type": "string",
+                        "description": "Retrieval method used"
+                    },
+                    "filters_applied": {
+                        "description": "Filters applied",
+                        "additionalProperties": true,
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "SearchMemoriesResponseData": {
+                "type": "object",
+                "required": [
+                    "query"
+                ],
+                "description": "Memory search result data",
+                "properties": {
+                    "episodes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SearchEpisodeItem"
+                        },
+                        "default": [],
+                        "description": "Episodic memory search results"
+                    },
+                    "profiles": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SearchProfileItem"
+                        },
+                        "default": [],
+                        "description": "Profile search results"
+                    },
+                    "raw_messages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RawMessageDTO"
+                        },
+                        "default": [],
+                        "description": "Raw unprocessed messages (pending)"
+                    },
+                    "agent_memory": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AgentMemorySearchResult"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "query": {
+                        "$ref": "#/components/schemas/SearchQueryInfo"
+                    },
+                    "original_data": {
+                        "additionalProperties": true,
+                        "description": "Original data (if include_original_data=true)",
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "SearchMemoriesResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/SearchMemoriesResponseData"
+                    }
+                }
+            },
+            "DeleteMemoriesRequest": {
+                "type": "object",
+                "description": "Two modes: by ID (memory_id only) or by filters (user_id/group_id with optional session_id/sender_id). Mutually exclusive.",
+                "properties": {
+                    "memory_id": {
+                        "description": "MemCell ID for single delete",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "user_id": {
+                        "description": "User ID scope for batch delete",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "group_id": {
+                        "description": "Group ID scope for batch delete",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "session_id": {
+                        "description": "Session filter (batch delete only)",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "sender_id": {
+                        "description": "Sender filter, matches participants array (batch delete only)",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "CreateGroupRequest": {
+                "type": "object",
+                "required": [
+                    "group_id"
+                ],
+                "properties": {
+                    "group_id": {
+                        "type": "string",
+                        "description": "Group identifier (unique)",
+                        "examples": [
+                            "group_abc"
+                        ]
+                    },
+                    "name": {
+                        "description": "Group display name",
+                        "examples": [
+                            "Project Discussion"
+                        ],
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "description": {
+                        "description": "Group description",
+                        "examples": [
+                            "Weekly sync on Project X"
+                        ],
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "PatchGroupRequest": {
+                "type": "object",
+                "description": "At least one of name or description must be provided.",
+                "properties": {
+                    "name": {
+                        "description": "New group display name",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "description": {
+                        "description": "New group description",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "GroupResponse": {
+                "type": "object",
+                "required": [
+                    "group_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "group_id": {
+                        "type": "string",
+                        "description": "Group identifier"
+                    },
+                    "name": {
+                        "description": "Group display name",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "description": {
+                        "description": "Group description",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "description": "Creation time (ISO 8601)"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "description": "Last update time (ISO 8601)"
+                    }
+                }
+            },
+            "GroupApiResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/GroupResponse"
+                    }
+                }
+            },
+            "CreateSenderRequest": {
+                "type": "object",
+                "required": [
+                    "sender_id"
+                ],
+                "properties": {
+                    "sender_id": {
+                        "type": "string",
+                        "description": "Sender identifier (unique)",
+                        "examples": [
+                            "user_123"
+                        ]
+                    },
+                    "name": {
+                        "description": "Sender display name",
+                        "examples": [
+                            "Alice"
+                        ],
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "PatchSenderRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "New sender display name",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "SenderResponse": {
+                "type": "object",
+                "required": [
+                    "sender_id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "sender_id": {
+                        "type": "string",
+                        "description": "Sender identifier"
+                    },
+                    "name": {
+                        "description": "Sender display name",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "description": "Creation time (ISO 8601)"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "description": "Last update time (ISO 8601)"
+                    }
+                }
+            },
+            "SenderApiResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/SenderResponse"
+                    }
+                }
+            },
+            "LlmProviderConfig": {
+                "type": "object",
+                "required": [
+                    "provider",
+                    "model"
+                ],
+                "properties": {
+                    "provider": {
+                        "type": "string",
+                        "description": "LLM provider name",
+                        "examples": [
+                            "openai",
+                            "openrouter",
+                            "anthropic"
+                        ]
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Model name",
+                        "examples": [
+                            "gpt-4.1-mini",
+                            "qwen/qwen3-235b-a22b-2507"
+                        ]
+                    },
+                    "extra": {
+                        "description": "Additional provider-specific configuration",
+                        "additionalProperties": true,
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "LlmCustomSetting": {
+                "type": "object",
+                "properties": {
+                    "boundary": {
+                        "description": "LLM config for boundary detection (fast, cheap model recommended)",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/LlmProviderConfig"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "extraction": {
+                        "description": "LLM config for memory extraction (high quality model recommended)",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/LlmProviderConfig"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "extra": {
+                        "description": "Additional task-specific LLM configurations",
+                        "additionalProperties": true,
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "UpdateSettingsRequest": {
+                "type": "object",
+                "properties": {
+                    "llm_custom_setting": {
+                        "description": "LLM custom settings for algorithm control",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/LlmCustomSetting"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "timezone": {
+                        "description": "IANA timezone identifier",
+                        "examples": [
+                            "UTC",
+                            "Asia/Shanghai"
+                        ],
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "boundary_detection_timeout": {
+                        "description": "MemCell auto-flush idle timeout in seconds",
+                        "examples": [
+                            3600
+                        ],
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "extraction_mode": {
+                        "description": "Extraction mode",
+                        "enum": [
+                            "default",
+                            "pro"
+                        ],
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "offline_profile_extraction_interval": {
+                        "description": "Offline profile extraction interval in seconds",
+                        "examples": [
+                            86400
+                        ],
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "SettingsResponse": {
+                "type": "object",
+                "required": [
+                    "timezone",
+                    "boundary_detection_timeout",
+                    "extraction_mode",
+                    "offline_profile_extraction_interval",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "llm_custom_setting": {
+                        "description": "LLM custom settings (serialized)",
+                        "additionalProperties": true,
+                        "type": [
+                            "object",
+                            "null"
+                        ]
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "description": "IANA timezone identifier"
+                    },
+                    "boundary_detection_timeout": {
+                        "type": "integer",
+                        "description": "MemCell auto-flush idle timeout in seconds"
+                    },
+                    "extraction_mode": {
+                        "type": "string",
+                        "description": "Extraction mode"
+                    },
+                    "offline_profile_extraction_interval": {
+                        "type": "integer",
+                        "description": "Offline profile extraction interval in seconds"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "description": "Creation time (ISO 8601)"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "description": "Last update time (ISO 8601)"
+                    }
+                }
+            },
+            "SettingsApiResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/SettingsResponse"
+                    }
+                }
+            },
+            "ObjectSignItemRequest": {
+                "type": "object",
+                "required": [
+                    "fileName",
+                    "fileType",
+                    "fileId"
+                ],
+                "description": "Single file sign request item",
+                "properties": {
+                    "fileName": {
+                        "type": "string",
+                        "description": "File name (may include extension)",
+                        "examples": [
+                            "photo.png"
+                        ]
+                    },
+                    "fileType": {
+                        "type": "string",
+                        "description": "File type category. Max size: image=10MB, file=100MB, video=500MB",
+                        "enum": [
+                            "image",
+                            "file",
+                            "video"
+                        ]
+                    },
+                    "fileId": {
+                        "type": "string",
+                        "description": "Business-defined unique file identifier",
+                        "examples": [
+                            "file_abc123"
+                        ]
+                    }
+                }
+            },
+            "ObjectSignRequest": {
+                "type": "object",
+                "required": [
+                    "objectList"
+                ],
+                "description": "Gateway transparently forwards to MMS service. Request must wrap items in objectList array.",
+                "properties": {
+                    "objectList": {
+                        "type": "array",
+                        "description": "List of files to sign (supports batch signing)",
+                        "items": {
+                            "$ref": "#/components/schemas/ObjectSignItemRequest"
+                        },
+                        "minItems": 1
+                    }
+                }
+            },
+            "ObjectSignedInfo": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "Pre-signed S3 upload URL"
+                    },
+                    "fields": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "description": "Form fields required for S3 POST upload (key, policy, x-amz-* headers, Content-Type)"
+                    },
+                    "maxSize": {
+                        "type": "integer",
+                        "description": "Maximum file size in bytes. image: 10MB, file: 100MB, video: 500MB"
+                    }
+                }
+            },
+            "ObjectSignItem": {
+                "type": "object",
+                "description": "Signed object item. MMS echoes back the request fields alongside generated signing info.",
+                "properties": {
+                    "fileName": {
+                        "type": "string",
+                        "description": "Echoed file name from request"
+                    },
+                    "fileType": {
+                        "type": "string",
+                        "description": "Echoed file type from request"
+                    },
+                    "fileId": {
+                        "type": "string",
+                        "description": "Echoed file ID from request"
+                    },
+                    "objectKey": {
+                        "type": "string",
+                        "description": "S3 object key (generated by MMS)"
+                    },
+                    "objectSignedInfo": {
+                        "$ref": "#/components/schemas/ObjectSignedInfo"
+                    }
+                }
+            },
+            "ObjectSignResponse": {
+                "type": "object",
+                "description": "MMS service response format (Gateway transparent proxy, not standard ErrorResponse format)",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "description": "Error message. 'OK' on success, error description on failure",
+                        "examples": [
+                            "OK",
+                            "参数验证失败"
+                        ]
+                    },
+                    "request_id": {
+                        "type": "string",
+                        "description": "MMS request tracking ID"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "description": "MMS status code. 200 = success, 2018 = validation error",
+                        "examples": [
+                            200,
+                            2018
+                        ]
+                    },
+                    "result": {
+                        "type": "object",
+                        "properties": {
+                            "data": {
+                                "type": "object",
+                                "description": "On success: contains objectList. On validation error: string error message.",
+                                "properties": {
+                                    "objectList": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/ObjectSignItem"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
