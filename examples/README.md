@@ -57,36 +57,14 @@ python 04_search_sync.py
 
 ### 客户端初始化
 
-> **已知 SDK Bug**：`auth_headers` 未 override，`EVERMEMOS_API_KEY` 不会自动注入 `Authorization` 头。
-> 所有示例通过 `_client.py` 中的 `make_client()` workaround 手动传入 Bearer Token。
-
 ```python
-# _client.py（样本集共用）
-import os
 from evermemos import EverMemOS, AsyncEverMemOS
 
-def make_client():
-    api_key = os.environ.get("EVERMEMOS_API_KEY", "")
-    return EverMemOS(default_headers={"Authorization": f"Bearer {api_key}"})
-
-# 各样本中使用：
-from _client import make_client, make_async_client
-client = make_client()        # 同步
-client = make_async_client()  # 异步
+client = EverMemOS()        # api_key 自动从 EVERMEMOS_API_KEY 读取
+client = AsyncEverMemOS()   # 异步版本
 ```
 
-直接构造时：
 ```python
-import os
-from evermemos import EverMemOS
-client = EverMemOS(
-    default_headers={"Authorization": f"Bearer {os.environ['EVERMEMOS_API_KEY']}"},
-    base_url="https://dev-gateway.aws.evermind.ai",  # 覆盖 EVER_MEM_OS_BASE_URL
-)
-
-# 异步客户端
-client = AsyncEverMemOS()
-
 # 资源入口（均通过 v1 命名空间）
 client.v1.memories          # 个人记忆
 client.v1.memories.agent    # Agent 轨迹记忆
