@@ -1,9 +1,7 @@
 # pip install evermemos
 # 搜索记忆（多种 method）—— 对应旧版 search_async.py
 #
-# NOTE: 服务端实际支持的 method: agentic, keyword, mrag, vector
-#   - hybrid: OpenAPI spec 中有定义但服务端未实现（422）
-#   - mrag: 服务端支持但不在 OpenAPI spec 中
+# NOTE: 服务端实际支持的 method: agentic, hybrid, keyword, vector
 from pprint import pprint
 from evermemos import EverMemOS
 
@@ -55,13 +53,12 @@ resp = memories.search(
 )
 pprint(resp)
 
-# --- 5. mrag 搜索（服务端支持，不在 OpenAPI spec 中）---
-print("\n=== mrag search ===")
+# --- 5. agentic 搜索 ---
+print("\n=== agentic search ===")
 resp = memories.search(
     filters={"user_id": USER_ID},
     query="mountain hiking",
-    method="mrag",  # type: ignore[arg-type]
-    include_original_data=True,
+    method="agentic",
     top_k=3,
 )
 pprint(resp)
