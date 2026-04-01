@@ -1,8 +1,8 @@
-# pip install evermemos
+# pip install everos
 # 删除记忆（单条 / 批量）—— 对应旧版 delete_async.py
-from evermemos import EverMemOS, InternalServerError, NotFoundError
+from everos import EverOS, InternalServerError, NotFoundError
 
-client = EverMemOS()
+client = EverOS()
 memories = client.v1.memories
 
 # --- 1. 按 memory_id 删除单条 ---

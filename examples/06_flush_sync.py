@@ -1,8 +1,8 @@
-# pip install evermemos
+# pip install everos
 # 手动触发会话边界（boundary detection）—— 对应旧版 flush=True 参数
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS()
+client = EverOS()
 memories = client.v1.memories
 
 # --- 1. 全局 flush（user 级别）---

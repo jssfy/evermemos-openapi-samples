@@ -1,9 +1,9 @@
-# EverMemOS SDK v1 Samples
-# 环境变量：EVERMEMOS_API_KEY, EVER_MEM_OS_BASE_URL
+# EverOS SDK v1 Samples
+# 环境变量：EVEROS_API_KEY, EVER_OS_BASE_URL
 #
 # 快速开始：
-#   export EVERMEMOS_API_KEY=xxx
-#   export EVER_MEM_OS_BASE_URL=https://dev-gateway.aws.evermind.ai
+#   export EVEROS_API_KEY=xxx
+#   export EVER_OS_BASE_URL=https://dev-gateway.aws.evermind.ai
 #   make all
 
 PYTHON := python
@@ -17,8 +17,8 @@ PYTHON := python
 
 # ── 环境检查 ──────────────────────────────────────────────
 check-env:
-	@test -n "$$EVERMEMOS_API_KEY"      || (echo "ERROR: EVERMEMOS_API_KEY not set"; exit 1)
-	@test -n "$$EVER_MEM_OS_BASE_URL"   || (echo "ERROR: EVER_MEM_OS_BASE_URL not set"; exit 1)
+	@test -n "$$EVEROS_API_KEY"      || (echo "ERROR: EVEROS_API_KEY not set"; exit 1)
+	@test -n "$$EVER_OS_BASE_URL"   || (echo "ERROR: EVER_OS_BASE_URL not set"; exit 1)
 
 # ── 单个样本 ─────────────────────────────────────────────
 add: check-env
@@ -85,7 +85,7 @@ management: check-env
 ## all: 顺序执行全部 10 个样本
 all: check-env
 	@echo "========================================"
-	@echo " EverMemOS SDK v1 - Running all samples"
+	@echo " EverOS SDK v1 - Running all samples"
 	@echo "========================================"
 	@for f in 01_add_sync.py 02_add_async.py 03_get_sync.py \
 	           04_search_sync.py 05_delete_sync.py 06_flush_sync.py \
@@ -103,11 +103,11 @@ all: check-env
 # ── 帮助 ─────────────────────────────────────────────────
 help:
 	@echo ""
-	@echo "EverMemOS SDK v1 Samples"
+	@echo "EverOS SDK v1 Samples"
 	@echo ""
 	@echo "  Prerequisites:"
-	@echo "    export EVERMEMOS_API_KEY=<your_key>"
-	@echo "    export EVER_MEM_OS_BASE_URL=https://dev-gateway.aws.evermind.ai"
+	@echo "    export EVEROS_API_KEY=<your_key>"
+	@echo "    export EVER_OS_BASE_URL=https://dev-gateway.aws.evermind.ai"
 	@echo ""
 	@echo "  Single sample:"
 	@echo "    make add          01_add_sync.py"

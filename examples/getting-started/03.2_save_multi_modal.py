@@ -1,11 +1,11 @@
-# pip install evermemos
+# pip install everos
 # Getting Started — Save multimodal memories (v1 SDK)
 # Demonstrates saving a message with mixed content: text + image + pdf
 
 import time
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS(api_key="evermemos_api_key")
+client = EverOS(api_key="everos_api_key")
 memories = client.v1.memories
 
 now_ms = int(time.time() * 1000)

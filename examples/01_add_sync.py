@@ -1,9 +1,9 @@
-# pip install evermemos (from EverMemOS-python SDK)
+# pip install everos (from EverOS-python SDK)
 # 同步写入个人记忆 —— 对应旧版 add_sync.py
 import time
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS()
+client = EverOS()
 memories = client.v1.memories
 
 # --- 单次写入（同步，立即提取）---

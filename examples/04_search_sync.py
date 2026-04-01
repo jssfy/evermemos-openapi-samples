@@ -1,4 +1,4 @@
-# pip install evermemos
+# pip install everos
 # 搜索记忆（多种 method）—— 对应旧版 search_async.py
 #
 # 前置条件：搜索结果依赖已存在的记忆数据。
@@ -8,9 +8,9 @@
 #
 # NOTE: 服务端实际支持的 method: agentic, hybrid, keyword, vector
 from pprint import pprint
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS()
+client = EverOS()
 memories = client.v1.memories
 
 USER_ID = "user_010"

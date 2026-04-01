@@ -1,9 +1,9 @@
-# pip install evermemos
+# pip install everos
 # 查询记忆（分类型） —— 对应旧版 get_async.py
 from pprint import pprint
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS()
+client = EverOS()
 memories = client.v1.memories
 
 USER_ID = "user_010"

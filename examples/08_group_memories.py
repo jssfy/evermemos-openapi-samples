@@ -1,10 +1,10 @@
-# pip install evermemos
+# pip install everos
 # 群组记忆：写入 + flush（每条消息必须带 sender_id）
 import time
 from pprint import pprint
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS()
+client = EverOS()
 group_mem = client.v1.memories.group
 
 GROUP_ID = "group_demo_001"

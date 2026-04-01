@@ -1,11 +1,11 @@
-# pip install evermemos
+# pip install everos
 # 文件上传预签名（批量）—— v1 新 API，支持一次签多个文件
 #
 # 实际响应结构：resp.result.data.object_list（非 resp.data）
 from pprint import pprint
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS()
+client = EverOS()
 obj = client.v1.object
 
 # --- 1. 签名单个图片 ---
@@ -52,7 +52,7 @@ if resp.result and resp.result.data and resp.result.data.object_list:
 
 # --- 3. 错误处理 ---
 print("\n=== error handling ===")
-from evermemos import BadRequestError, UnprocessableEntityError
+from everos import BadRequestError, UnprocessableEntityError
 
 try:
     resp = obj.sign(

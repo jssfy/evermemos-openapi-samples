@@ -1,9 +1,9 @@
-# pip install evermemos
+# pip install everos
 # Getting Started — Get memories (v1 SDK)
 
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS(api_key="evermemos_api_key")
+client = EverOS(api_key="everos_api_key")
 memories = client.v1.memories
 
 response = memories.get(

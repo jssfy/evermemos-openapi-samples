@@ -1,10 +1,10 @@
-# pip install evermemos
+# pip install everos
 # Agent 记忆：写入 + flush（支持 tool_calls / tool role）
 import time
 from pprint import pprint
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS()
+client = EverOS()
 agent = client.v1.memories.agent
 
 USER_ID = "user_010"

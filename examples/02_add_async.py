@@ -1,10 +1,10 @@
-# pip install evermemos
+# pip install everos
 # 异步模式写入 + 轮询任务状态 —— 对应旧版 add_async.py / get_request_status_async.py
 import asyncio
 import time
-from evermemos import AsyncEverMemOS, NotFoundError
+from everos import AsyncEverOS, NotFoundError
 
-client = AsyncEverMemOS()
+client = AsyncEverOS()
 memories = client.v1.memories
 tasks = client.v1.tasks
 

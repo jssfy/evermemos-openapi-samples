@@ -1,14 +1,14 @@
-# EverMemOS Python SDK v1 - 示例集
+# EverOS Python SDK v1 - 示例集
 
-基于 Stainless 生成的 Python SDK（`EverMemOS-python`），对应 OpenAPI 规范 `openapi.json`（2026-03-30 最新版）。
+基于 Stainless 生成的 Python SDK（`EverOS-python`），对应 OpenAPI 规范 `openapi.json`（2026-03-30 最新版）。
 
 ## 版本记录
 
 | 日期 | Spec 文件 | 测试包安装命令 | `EVER_MEM_OS_BASE_URL` 可选值 |
 |------|-----------|--------------|-------------------------------|
-| 2026-03-30 | `docs/openapi-specs/openapi-0330.json` | `pip install 'https://pkg.stainless.com/s/EverMemOS-python/57e6f13222c8cadeb2744ed45d3c31c768835ff4/evermemos-0.3.6-py3-none-any.whl'` | `http://localhost:9527` · `https://dev-gateway.aws.evermind.ai` · `https://test-gateway.aws.evermind.ai` · `https://api.evermind.ai` |
+| 2026-03-30 | `docs/openapi-specs/openapi-0330.json` | `pip install 'https://pkg.stainless.com/s/EverOS-python/57e6f13222c8cadeb2744ed45d3c31c768835ff4/evermemos-0.3.6-py3-none-any.whl'` | `http://localhost:9527` · `https://dev-gateway.aws.evermind.ai` · `https://test-gateway.aws.evermind.ai` · `https://api.evermind.ai` |
 
-SDK 路径：`code/openapi/stainless/evermemos/sdks/EverMemOS-python`
+SDK 路径：`code/openapi/stainless/evermemos/sdks/EverOS-python`
 
 ---
 
@@ -22,17 +22,17 @@ SDK 路径：`code/openapi/stainless/evermemos/sdks/EverMemOS-python`
 
 ```bash
 # 使用本地生成的 SDK（推荐，无需发布 PyPI）
-SDK_PATH="$(git rev-parse --show-toplevel)/code/openapi/stainless/evermemos/sdks/EverMemOS-python"
+SDK_PATH="$(git rev-parse --show-toplevel)/code/openapi/stainless/evermemos/sdks/EverOS-python"
 pip install -e "$SDK_PATH"
 
 # 或从 PyPI 安装发布版（evermemos 0.3.6）
-pip install evermemos
+pip install everos
 ```
 
 ### 2. 配置环境变量
 
 ```bash
-export EVERMEMOS_API_KEY="your_api_key"
+export EVEROS_API_KEY="your_api_key"
 
 # 覆盖接入点（SDK 读取 EVER_MEM_OS_BASE_URL，默认 https://api.evermind.ai）
 # 可选值（来自 openapi.json servers）：
@@ -50,7 +50,7 @@ export EVER_MEM_OS_BASE_URL="https://dev-gateway.aws.evermind.ai"
 ```bash
 cd evermemos/backend/samples-on-sdk
 
-# 运行任意示例（需先配置 EVERMEMOS_API_KEY）
+# 运行任意示例（需先配置 EVEROS_API_KEY）
 python 01_add_sync.py
 python 04_search_sync.py
 ```
@@ -58,10 +58,10 @@ python 04_search_sync.py
 ### 客户端初始化
 
 ```python
-from evermemos import EverMemOS, AsyncEverMemOS
+from everos import EverOS, AsyncEverOS
 
-client = EverMemOS()        # api_key 自动从 EVERMEMOS_API_KEY 读取
-client = AsyncEverMemOS()   # 异步版本
+client = EverOS()        # api_key 自动从 EVEROS_API_KEY 读取
+client = AsyncEverOS()   # 异步版本
 ```
 
 ```python
@@ -157,7 +157,7 @@ resp = client.v1.object.sign(
 ### 错误处理
 
 ```python
-from evermemos import BadRequestError, UnprocessableEntityError, AuthenticationError
+from everos import BadRequestError, UnprocessableEntityError, AuthenticationError
 
 try:
     client.v1.memories.add(...)

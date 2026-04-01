@@ -1,9 +1,9 @@
-# pip install evermemos
+# pip install everos
 # Groups / Senders / Settings CRUD
 from pprint import pprint
-from evermemos import EverMemOS
+from everos import EverOS
 
-client = EverMemOS()
+client = EverOS()
 groups = client.v1.groups
 senders = client.v1.senders
 settings = client.v1.settings
