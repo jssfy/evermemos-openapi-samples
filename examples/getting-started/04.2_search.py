@@ -1,12 +1,11 @@
 # pip install evermemos
-# Getting Started — 搜索记忆（v1 SDK）
-# 对应 v0: getting-started/04.2-search.py
+# Getting Started — Search memories (v1 SDK)
 #
-# 前置条件：先运行 03-save.py 写入数据，等待 ~10s 提取完成后再搜索。
+# Prerequisite: run 03_save.py first, then wait ~10s for extraction to complete.
 
 from evermemos import EverMemOS
 
-client = EverMemOS()
+client = EverMemOS(api_key="evermemos_api_key")
 memories = client.v1.memories
 
 response = memories.search(
@@ -18,5 +17,3 @@ response = memories.search(
 
 episodes = response.data.episodes if response.data else []
 print(f"Found {len(episodes)} memories")
-for ep in episodes:
-    print(f"  score={ep.score:.3f}  {ep.episode}")

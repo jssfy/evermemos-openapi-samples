@@ -1,12 +1,11 @@
 # pip install evermemos
-# Getting Started — 查询记忆（v1 SDK）
-# 对应 v0: getting-started/04.1-get.py
+# Getting Started — Get memories (v1 SDK)
 #
-# 前置条件：先运行 03-save.py 写入数据，等待 ~10s 提取完成后再查询。
+# Prerequisite: run 03_save.py first, then wait ~10s for extraction to complete.
 
 from evermemos import EverMemOS
 
-client = EverMemOS()
+client = EverMemOS(api_key="evermemos_api_key")
 memories = client.v1.memories
 
 response = memories.get(
@@ -14,7 +13,5 @@ response = memories.get(
     memory_type="episodic_memory",
 )
 
-items = response.data.episodes if response.data else []
-print(f"Fetched {len(items)} memories")
-for mem in items:
-    print(f"  {mem.episode}")
+episodes = response.data.episodes if response.data else []
+print(f"Fetched {len(episodes) if episodes else 0} memories")

@@ -1,11 +1,10 @@
 # pip install evermemos
-# Getting Started — 写入记忆（v1 SDK）
-# 对应 v0: getting-started/03-save.py
+# Getting Started — Save memories (v1 SDK)
 
 import time
 from evermemos import EverMemOS
 
-client = EverMemOS()  # 自动读取 EVERMEMOS_API_KEY 环境变量
+client = EverMemOS(api_key="evermemos_api_key")
 memories = client.v1.memories
 
 now_ms = int(time.time() * 1000)
@@ -21,13 +20,9 @@ response = memories.add(
         },
         {
             "role": "user",
-            "timestamp": now_ms + 60_000,
+            "timestamp": now_ms + 86_400_000,  # 1 day later
             "content": "Today I want to discuss the project progress.",
         },
     ],
 )
 print(f"status={response.data.status}  task_id={response.data.task_id}")
-
-# 可选：显式触发会话边界（等价于 v0 的 flush=True）
-memories.flush(user_id="user_demo_001", session_id="session_gs_001")
-print("flush done")
