@@ -1,6 +1,11 @@
 # pip install evermemos
 # 搜索记忆（多种 method）—— 对应旧版 search_async.py
 #
+# 前置条件：搜索结果依赖已存在的记忆数据。
+#   - 个人记忆搜索（user_id）：先运行 01_add_sync.py 写入数据，等待 ~10s 异步提取完成后再搜索
+#   - 群组记忆搜索（group_id）：先运行 08_group_memories.py 写入数据，等待 ~10s 后再搜索
+#   - 若搜索返回空列表，通常是数据未写入或提取尚未完成
+#
 # NOTE: 服务端实际支持的 method: agentic, hybrid, keyword, vector
 from pprint import pprint
 from evermemos import EverMemOS
