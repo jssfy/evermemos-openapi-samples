@@ -1,7 +1,5 @@
 # pip install evermemos
 # Getting Started — Get memories (v1 SDK)
-#
-# Prerequisite: run 03_save.py first, then wait ~10s for extraction to complete.
 
 from evermemos import EverMemOS
 
