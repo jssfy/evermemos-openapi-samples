@@ -78,18 +78,18 @@ client.v1.tasks             # 异步任务状态
 
 ## 示例文件
 
-| 文件 | 说明 | 对应旧版 |
+| 文件 | 说明 | 调用接口 |
 |------|------|---------|
-| `01_add_sync.py` | 同步写入个人记忆 | `add_sync.py` |
-| `02_add_async.py` | 异步写入 + task 轮询 | `add_async.py` + `get_request_status_async.py` |
-| `03_get_sync.py` | 查询记忆（多类型 + 时间范围过滤） | `get_async.py` |
-| `04_search_sync.py` | 语义 / 关键字搜索（hybrid / vector / keyword） | `search_async.py` |
-| `05_delete_sync.py` | 按 ID / 批量删除记忆 | `delete_async.py` |
-| `06_flush_sync.py` | 手动触发会话边界提取 | `add_sync.py` (`flush=True`) |
-| `07_agent_memories.py` | Agent 轨迹记忆（含 tool_calls / null content） | 新功能 |
-| `08_group_memories.py` | 群组多人对话记忆 | 新功能 |
-| `09_groups_senders.py` | Groups / Senders / Settings CRUD | 新功能 |
-| `10_object_sign.py` | 文件批量预签名（v1 新批量 API） | 旧版单文件签名 |
+| `01_add_sync.py` | 同步写入个人记忆 | `POST /api/v1/memories` |
+| `02_add_async.py` | 异步写入 + task 轮询 | `POST /api/v1/memories`（async_mode=true）<br>`GET /api/v1/tasks/{task_id}` |
+| `03_get_sync.py` | 查询记忆（多类型 + 时间范围过滤） | `POST /api/v1/memories/get` |
+| `04_search_sync.py` | 语义 / 关键字搜索（hybrid / vector / keyword） | `POST /api/v1/memories/search` |
+| `05_delete_sync.py` | 按 ID / 批量删除记忆 | `POST /api/v1/memories/delete` |
+| `06_flush_sync.py` | 手动触发会话边界提取 | `POST /api/v1/memories`<br>`POST /api/v1/memories/flush` |
+| `07_agent_memories.py` | Agent 轨迹记忆（含 tool_calls） | `POST /api/v1/memories/agent`<br>`POST /api/v1/memories/agent/flush` |
+| `08_group_memories.py` | 群组多人对话记忆 | `POST /api/v1/memories/group`<br>`POST /api/v1/memories/group/flush` |
+| `09_groups_senders.py` | Groups / Senders / Settings CRUD | `POST /api/v1/groups`<br>`GET /api/v1/groups/{group_id}`<br>`PATCH /api/v1/groups/{group_id}`<br>`POST /api/v1/senders`<br>`GET /api/v1/senders/{sender_id}`<br>`PATCH /api/v1/senders/{sender_id}`<br>`GET /api/v1/settings`<br>`PUT /api/v1/settings` |
+| `10_object_sign.py` | 文件批量预签名 | `POST /api/v1/object/sign` |
 
 ## 关键调用模式速查
 

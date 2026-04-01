@@ -14,7 +14,7 @@ endif
 # Python 运行命令（使用 uv 管理依赖和虚拟环境）
 PYTHON := uv run python
 
-# 默认目标：运行所有测试用例（除了 batch_add_async）
+# 默认目标：运行所有测试用例（01–10）
 test: test-all
 
 # 初始化环境（安装依赖）
@@ -30,59 +30,59 @@ test-all:
 	@echo "开始运行所有测试用例..."
 	@echo "=========================================="
 	@echo ""
-	@echo "📝 1/8 - 创建对话元数据 (create_meta_async.py)"
-	@cd examples && $(PYTHON) create_meta_async.py
+	@echo "📝 1/10 - 同步写入个人记忆 (01_add_sync.py)"
+	@cd examples && $(PYTHON) 01_add_sync.py
 	@echo ""
-	@echo "✅ 1/8 完成"
+	@echo "✅ 1/10 完成"
 	@echo ""
-	@echo "📝 2/8 - 异步添加记忆 (add_async.py)"
-	@cd examples && $(PYTHON) add_async.py
+	@echo "📝 2/10 - 异步写入 + 轮询状态 (02_add_async.py)"
+	@cd examples && $(PYTHON) 02_add_async.py
 	@echo ""
-	@echo "✅ 2/8 完成"
+	@echo "✅ 2/10 完成"
 	@echo ""
-	@echo "📝 3/8 - 同步添加记忆 (add_sync.py)"
-	@cd examples && $(PYTHON) add_sync.py
+	@echo "📝 3/10 - 查询记忆 (03_get_sync.py)"
+	@cd examples && $(PYTHON) 03_get_sync.py
 	@echo ""
-	@echo "✅ 3/8 完成"
+	@echo "✅ 3/10 完成"
 	@echo ""
-	@echo "📝 4/8 - 获取记忆 (get_async.py)"
-	@cd examples && $(PYTHON) get_async.py
+	@echo "📝 4/10 - 搜索记忆 (04_search_sync.py)"
+	@cd examples && $(PYTHON) 04_search_sync.py
 	@echo ""
-	@echo "✅ 4/8 完成"
+	@echo "✅ 4/10 完成"
 	@echo ""
-	@echo "📝 5/8 - 获取元数据 (get_meta_async.py)"
-	@cd examples && $(PYTHON) get_meta_async.py
+	@echo "📝 5/10 - 删除记忆 (05_delete_sync.py)"
+	@cd examples && $(PYTHON) 05_delete_sync.py
 	@echo ""
-	@echo "✅ 5/8 完成"
+	@echo "✅ 5/10 完成"
 	@echo ""
-	@echo "📝 6/8 - 搜索记忆 (search_async.py)"
-	@cd examples && $(PYTHON) search_async.py
+	@echo "📝 6/10 - 触发会话边界 (06_flush_sync.py)"
+	@cd examples && $(PYTHON) 06_flush_sync.py
 	@echo ""
-	@echo "✅ 6/8 完成"
+	@echo "✅ 6/10 完成"
 	@echo ""
-	@echo "📝 7/8 - 更新元数据 (update_meta_async.py)"
-	@cd examples && $(PYTHON) update_meta_async.py
+	@echo "📝 7/10 - Agent 记忆 (07_agent_memories.py)"
+	@cd examples && $(PYTHON) 07_agent_memories.py
 	@echo ""
-	@echo "✅ 7/8 完成"
+	@echo "✅ 7/10 完成"
 	@echo ""
-	@echo "📝 8/8 - 删除记忆 (delete_async.py)"
-	@cd examples && $(PYTHON) delete_async.py
+	@echo "📝 8/10 - 群组记忆 (08_group_memories.py)"
+	@cd examples && $(PYTHON) 08_group_memories.py
 	@echo ""
-	@echo "✅ 8/8 完成"
+	@echo "✅ 8/10 完成"
+	@echo ""
+	@echo "📝 9/10 - Groups/Senders/Settings CRUD (09_groups_senders.py)"
+	@cd examples && $(PYTHON) 09_groups_senders.py
+	@echo ""
+	@echo "✅ 9/10 完成"
+	@echo ""
+	@echo "📝 10/10 - 文件上传预签名 (10_object_sign.py)"
+	@cd examples && $(PYTHON) 10_object_sign.py
+	@echo ""
+	@echo "✅ 10/10 完成"
 	@echo ""
 	@echo "=========================================="
 	@echo "🎉 所有测试用例执行成功！"
 	@echo "=========================================="
-
-# 运行批量添加测试（需要文件路径参数）
-test-batch:
-	@echo "📝 批量添加记忆 (batch_add_async.py)"
-	@if [ -z "$(FILE)" ]; then \
-		echo "❌ 错误: 需要指定文件路径"; \
-		echo "用法: make test-batch FILE=path/to/file.txt"; \
-		exit 1; \
-	fi
-	@cd examples && $(PYTHON) batch_add_async.py $(FILE) $(CHUNK_SIZE) $(START) $(MAX)
 
 # 运行单个测试用例
 test-one:
@@ -107,9 +107,9 @@ help:
 	@echo ""
 	@echo "可用的 make 目标："
 	@echo "  make setup         - 初始化 uv 环境（首次使用前运行）"
-	@echo "  make test          - 运行所有测试用例（默认，除了 batch_add_async）"
-	@echo "  make test-all      - 运行所有测试用例（除了 batch_add_async）"
-	@echo "  make test-batch    - 运行批量添加测试"
+	@echo "  make test          - 运行所有测试用例（默认，01–10）"
+	@echo "  make test-all      - 运行所有测试用例（01–10）"
+	@echo "  make test-batch    - 运行批量离线导入测试"
 	@echo "                       用法: make test-batch FILE=input.txt [CHUNK_SIZE=1000] [START=1] [MAX=10]"
 	@echo "  make test-one      - 运行单个测试用例"
 	@echo "                       用法: make test-one SCRIPT=add_async.py"
@@ -142,4 +142,4 @@ help:
 	@echo "  make test ENV=test                      # 测试环境"
 	@echo "  make test ENV=prod                      # 生产环境"
 	@echo "  make test-batch FILE=test.txt CHUNK_SIZE=500"
-	@echo "  make test-one SCRIPT=search_async.py"
+	@echo "  make test-one SCRIPT=04_search_sync.py"
