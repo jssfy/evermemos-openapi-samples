@@ -12,8 +12,8 @@
 运行示例前，需要设置以下环境变量：
 
 ```bash
-export EVERMEMOS_API_KEY="your_api_key"
-export EVER_MEM_OS_CLIENT_BASE_URL="https://api.evermind.ai"
+export EVEROS_API_KEY="your_api_key"
+export EVER_OS_BASE_URL="https://api.evermind.ai"
 ```
 
 ## 测试环境版本历史
@@ -106,8 +106,8 @@ python add_async.py
   - 示例: `python batch_add_async.py input.txt 1000 5  # 从第5块开始`
   - 示例: `python batch_add_async.py input.txt 1000 1 10  # 从第1块开始，处理10个块`
 - **环境变量**:
-  - `EVERMEMOS_API_KEY`: API密钥（必需）
-  - `EVER_MEM_OS_CLIENT_BASE_URL`: API地址（可选）
+  - `EVEROS_API_KEY`: API密钥（必需）
+  - `EVER_OS_BASE_URL`: API地址（可选）
   - `EVERMEMOS_GROUP_ID`: 群组ID（默认: group_123）
   - `EVERMEMOS_GROUP_NAME`: 群组名称（默认: Project Discussion Group）
   - `EVERMEMOS_SENDER`: 发送者ID（默认: user_001）
@@ -122,8 +122,8 @@ python add_async.py
   - 消息会被加入处理队列
 - **运行**: `python import_memories_async.py`
 - **环境变量**:
-  - `EVERMEMOS_API_KEY`: API密钥（必需）
-  - `EVER_MEM_OS_CLIENT_BASE_URL`: API地址（可选）
+  - `EVEROS_API_KEY`: API密钥（必需）
+  - `EVER_OS_BASE_URL`: API地址（可选）
   - `EVERMEMOS_GROUP_ID`: 群组ID（默认: group_import_001）
 
 ### 获取记忆
@@ -231,7 +231,7 @@ python add_async.py
 
 ## 注意事项
 
-- 所有示例都需要先配置环境变量 `EVERMEMOS_API_KEY` 和 `EVER_MEM_OS_CLIENT_BASE_URL`
+- 所有示例都需要先配置环境变量 `EVEROS_API_KEY` 和 `EVER_OS_BASE_URL`
 - 删除操作不可逆，请谨慎使用
 - 创建默认配置时，需要不提供 `group_id` 参数
 - 搜索功能使用 `extra_query` 传递参数，避免参数冲突

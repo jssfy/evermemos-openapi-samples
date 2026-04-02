@@ -4,7 +4,7 @@
 
 ## 版本记录
 
-| 日期 | Spec 文件 | 测试包安装命令 | `EVER_MEM_OS_BASE_URL` 可选值 |
+| 日期 | Spec 文件 | 测试包安装命令 | `EVER_OS_BASE_URL` 可选值 |
 |------|-----------|--------------|-------------------------------|
 | 2026-03-30 | `docs/openapi-specs/openapi-0330.json` | `pip install 'https://pkg.stainless.com/s/EverOS-python/57e6f13222c8cadeb2744ed45d3c31c768835ff4/evermemos-0.3.6-py3-none-any.whl'` | `http://localhost:9527` · `https://dev-gateway.aws.evermind.ai` · `https://test-gateway.aws.evermind.ai` · `https://api.evermind.ai` |
 
@@ -34,16 +34,16 @@ pip install everos
 ```bash
 export EVEROS_API_KEY="your_api_key"
 
-# 覆盖接入点（SDK 读取 EVER_MEM_OS_BASE_URL，默认 https://api.evermind.ai）
+# 覆盖接入点（SDK 读取 EVER_OS_BASE_URL，默认 https://api.evermind.ai）
 # 可选值（来自 openapi.json servers）：
 #   http://localhost:9527                  Local Gateway server
 #   https://dev-gateway.aws.evermind.ai   DEV environment
 #   https://test-gateway.aws.evermind.ai  TEST environment
 #   https://api.evermind.ai               Production（默认）
-export EVER_MEM_OS_BASE_URL="https://dev-gateway.aws.evermind.ai"
+export EVER_OS_BASE_URL="https://dev-gateway.aws.evermind.ai"
 ```
 
-> **注意**：环境变量名是 `EVER_MEM_OS_BASE_URL`，不是 `EVERMEMOS_BASE_URL`。
+> **注意**：环境变量名是 `EVER_OS_BASE_URL`，不是 `EVERMEMOS_BASE_URL`。
 
 ### 3. 运行示例
 
