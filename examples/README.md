@@ -169,6 +169,117 @@ except AuthenticationError:             # 401 API Key 无效
 
 ---
 
+## FAQ
+
+### Q: 传入不存在的本地文件路径，为什么 SDK 不报错？
+
+`scan_messages()` 用 `os.path.isfile()` 判断 `uri` 是否为本地文件。若文件不存在，URI 会被当作**已有的 `object_key`** 原样透传给 API，SDK 层不抛异常。
+
+```
+uri 判断逻辑（_detect.py）
+├── http:// 或 https:// 开头     → 下载后上传
+├── os.path.isfile() == True     → 直接上传
+└── 其他（含不存在的路径）        → 视为 object_key，原样透传 ← 静默跳过
+```
+
+**结果**：API 收到一个无效的 `object_key`，同步模式（`async_mode=False`）可能返回错误，异步模式（`async_mode=True`，默认）则 `add()` 返回 `202 queued`，实际任务处理时 `task_id` 对应的 `status` 最终为 `"failed"`。
+
+**最佳实践**：传入本地路径前确保文件真实存在，或用 `async_mode=False` + 任务轮询检测失败。
+
+---
+
+### Q: HTTP URL 返回 404 / 非 2xx 时会怎样？
+
+SDK 会立即抛出 `FileResolveError`，`add()` 调用中断，**不会**调用 API。这是符合预期的行为。
+
+实测日志（URL 末尾加了无效后缀 `pngxxx`）：
+
+```
+DEBUG everos: Multimodal detected: 1 file(s) to upload
+DEBUG everos:   [0] messages[1].content[1] type=image uri=https://s41.ax1x.com/.../peG0uAH.pngxxx (http)
+INFO  httpx: HTTP Request: GET https://s41.ax1x.com/.../peG0uAH.pngxxx "HTTP/1.1 404 Not Found"
+# ↑ 下载失败，resp.raise_for_status() 抛出 HTTPStatusError
+# ↑ _resolve_from_url 捕获后包装为 FileResolveError
+
+everos.lib._errors.FileResolveError: Failed to download https://.../peG0uAH.pngxxx:
+  Client error '404 Not Found' for url '...'
+```
+
+与本地不存在路径的处理对比：
+
+| 情况 | SDK 行为 | API 是否被调用 |
+|------|---------|--------------|
+| 本地路径不存在 | 静默跳过，原样透传 uri | ✅ 是（带无效 uri） |
+| HTTP URL 返回 4xx/5xx | 立即抛 `FileResolveError` | ❌ 否，调用中断 |
+| HTTP URL 返回 200 | 正常下载 → sign → 上传 | ✅ 是（带有效 object_key） |
+
+捕获方式：
+
+```python
+from everos.lib import FileResolveError
+
+try:
+    response = memories.add(...)
+except FileResolveError as e:
+    print(f"文件解析失败: {e}")  # HTTP 下载失败或本地路径校验失败
+```
+
+---
+
+### Q: 本地文件 vs HTTP URL，上传流程有什么区别？
+
+| 来源 | 流程 | 临时文件 |
+|------|------|---------|
+| 本地路径 | 直接 sign → S3 POST | 无 |
+| HTTP URL | 先下载到 tempfile（最大 100 MB）→ sign → S3 POST | 有（`finally` 中自动清理） |
+
+HTTP 下载限制：超过 100 MB 抛 `FileResolveError`，需改用低层 `client.v1.object.sign()` 手动上传。
+
+---
+
+### Q: `object.sign` 响应如何判断成功？
+
+响应字段 `status` 的成功值为 `0`（**不是** `200`，OpenAPI 文档有误，以 SDK 实现为准）：
+
+```python
+# 有效的 sign 响应需同时满足：
+sign_resp.status == 0          # MMS 业务码，0 = 成功
+sign_resp.error == "OK"        # 文字描述
+len(sign_resp.result.data.object_list) == len(upload_tasks)  # 数量匹配
+# 每项：object_key 非空 且 object_signed_info.url 非空
+```
+
+---
+
+### Q: S3 上传失败会重试吗？
+
+会，规则如下：
+
+| 情况 | 处理 |
+|------|------|
+| HTTP 5xx / 超时 | 最多重试 3 次，间隔 1 秒 |
+| HTTP 4xx | 立即抛 `UploadError`，不重试 |
+| 3 次均失败 | 抛 `UploadError` |
+
+---
+
+### Q: `add()` 返回后如何确认文件被处理？
+
+```python
+# 同步模式（async_mode=False）——返回时文件已处理
+response = memories.add(..., async_mode=False)
+print(response.data.status)   # "accumulated" | "extracted"
+
+# 异步模式（默认）——需轮询 task_id
+response = memories.add(...)
+task_id = response.data.task_id
+status = client.v1.tasks.retrieve(task_id).data.status
+# "processing" | "success" | "failed"
+# ⚠️ task_id 在 Redis 中 TTL = 1 小时
+```
+
+---
+
 ## v0 → v1 主要变化
 
 | 维度 | v0 (旧 SDK) | v1 (新 SDK) |

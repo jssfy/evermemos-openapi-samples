@@ -37,7 +37,7 @@ response = memories.add(
                 {"type": "text", "text": "Reference image from the web."},
                 {
                     "type": "image",
-                    "uri": "https://s41.ax1x.com/2026/04/01/peG0uAH.png",  # HTTP URL — auto-downloaded + uploaded
+                    "uri": "https://storage.example.com/uploads/restaurant.jpg",  # HTTP URL — auto-downloaded + uploaded
                 },
             ],
         },
