@@ -52,14 +52,14 @@ pprint(resp)
 
 # ======================== Settings ========================
 
-print("\n=== retrieve settings ===")
-resp = settings.retrieve()
-pprint(resp)
-
 print("\n=== update settings ===")
 resp = settings.update(
     timezone="Asia/Shanghai",
     extraction_mode="default",
     boundary_detection_timeout=300,
 )
+pprint(resp)
+
+print("\n=== retrieve settings ===")
+resp = settings.retrieve()
 pprint(resp)
