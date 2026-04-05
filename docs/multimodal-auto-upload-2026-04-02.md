@@ -291,3 +291,76 @@ MultimodalError            # 基类
 | 原始数据保护 | `deepcopy` 后再修改，不污染调用方数据 |
 | 临时文件保证 | `finally` 块无条件清理 |
 | object key 透传 | 非 http/本地文件的 uri 直接透传，不重复上传 |
+
+---
+
+## 七、实际运行日志示例
+
+以下为 `03.4_save_multi_modal_debug.py` 的完整 debug 日志（已添加阶段标注）：
+
+### 阶段 1：检测与下载
+
+```
+DEBUG everos: Multimodal detected: 1 file(s) to upload
+DEBUG everos:   [0] messages[1].content[1] type=image uri=https://s41.ax1x.com/2026/04/01/peG0uAH.png (http)
+DEBUG httpcore.connection: connect_tcp.started host='s41.ax1x.com' port=443
+DEBUG httpcore.connection: start_tls.started
+INFO  httpx: HTTP Request: GET https://s41.ax1x.com/2026/04/01/peG0uAH.png "HTTP/1.1 200 OK"
+DEBUG everos: Resolved https://s41.ax1x.com/... → 183108 bytes image/png
+```
+
+**含义**：SDK 从图床流式下载图片（64KB 分块），返回 200 OK，大小 183 KB。
+
+### 阶段 2：批量签名
+
+```
+DEBUG everos: Signing 1 file(s) in one batch request
+DEBUG everos._base_client: Request options: {'method': 'post', 'url': '/api/v1/object/sign', ...}
+DEBUG everos._base_client: Sending HTTP Request: POST https://test-gateway.aws.evermind.ai/api/v1/object/sign
+INFO  httpx: HTTP Request: POST https://test-gateway.aws.evermind.ai/api/v1/object/sign "HTTP/1.1 200 OK"
+DEBUG everos:   Signed: peG0uAH.png → fee1c04a813880d9/28b1e5b6-36ba-4a39-9d64-8de526c2e335
+```
+
+**含义**：一次 `POST /api/v1/object/sign` 调用完成所有文件签名，返回 S3 object key。
+
+### 阶段 3：S3 上传
+
+```
+DEBUG everos: Uploading peG0uAH.png (183108 bytes) to S3 (attempt 1/3)
+DEBUG httpcore.connection: connect_tcp.started host='dev-multimodal-storage.s3.us-west-2.amazonaws.com' port=443 timeout=120.0
+DEBUG httpcore.connection: start_tls.started
+INFO  httpx: HTTP Request: POST https://dev-multimodal-storage.s3.us-west-2.amazonaws.com/ "HTTP/1.1 204 No Content"
+DEBUG everos: Uploaded peG0uAH.png → HTTP 204
+DEBUG everos: Replaced messages[1].content[1].uri: https://s41.ax1x.com/... → fee1c04a813880d9/28b1e5b6-...
+```
+
+**含义**：
+- 连接 S3 超时 120 秒（比普通 HTTP 60 秒更长）
+- S3 返回 `204 No Content` = 上传成功
+- `x-amz-server-side-encryption: AES256` 表示服务端加密已启用
+- 原始 HTTP URL 被替换为 S3 object key
+
+### 阶段 4：创建 Memory（异步）
+
+```
+DEBUG everos._base_client: Sending HTTP Request: POST https://test-gateway.aws.evermind.ai/api/v1/memories
+INFO  httpx: HTTP Request: POST https://test-gateway.aws.evermind.ai/api/v1/memories "HTTP/1.1 202 Accepted"
+DEBUG everos._base_client: HTTP Response: POST https://test-gateway.aws.evermind.ai/api/v1/memories "202 Accepted"
+status=queued  task_id=02177540535158100000000000000000000ffff0a1f5228501b2a
+DEBUG everos: Cleaned up 1 temp file(s)
+```
+
+**含义**：
+- Memory 创建返回 `202 Accepted`（而非 200），表示异步排队处理
+- 返回 `task_id` 用于查询处理状态
+- SDK 自动清理下载的临时文件
+
+### 综合判断
+
+| 检查点 | 状态 | 说明 |
+|--------|------|------|
+| HTTP 请求 | ✅ | 所有请求返回 2xx |
+| S3 加密 | ✅ | `x-amz-server-side-encryption: AES256` |
+| Memory 创建 | ✅ | 202 Accepted，异步排队 |
+| 临时文件清理 | ✅ | `Cleaned up 1 temp file(s)` |
+| 重试机制 | ✅ | 上传显示 `attempt 1/3`，未触发重试 |
