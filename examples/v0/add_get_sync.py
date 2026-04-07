@@ -30,7 +30,7 @@ while elapsed < 600:  # seconds
     status_response = request_stats.get(request_id=request_id)
     s = (status_response.data or {}).get("status") or getattr(status_response, "status", None) or "unknown"
     print(f"  [polling] status={s}")
-    if s == "success":
+    if s in ("success", "failed"):
         break
     time.sleep(poll_interval)
     elapsed += poll_interval
