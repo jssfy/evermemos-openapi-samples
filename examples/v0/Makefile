@@ -108,7 +108,7 @@ getting-started: check-env
 	$(PYTHON) getting-started/04.2_search.py
 
 ## all: 顺序执行全部样本（跳过 reproduce-bugs & getting-started 教学示例）
-all: check-env
+all:
 	@echo "========================================"
 	@echo " EverOS SDK v0 - Running all samples"
 	@echo "========================================"
