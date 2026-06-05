@@ -6,6 +6,7 @@
 
 | 日期 | Spec 文件 | 测试包安装命令 | `EVER_OS_BASE_URL` 可选值 |
 |------|-----------|--------------|-------------------------------|
+| 2026-05-18 | `openapi.json`（路径改为 `/api/v1/memory/*`，资源改为 `client.memory`） | `pip install 'https://pkg.stainless.com/s/everos-trial-python/29fcf29579e027805166762a65da8592e94f01ff/everos-0.0.1-py3-none-any.whl'` | `https://dev-gateway.aws.evermind.ai` · `https://api.evermind.ai` |
 | 2026-03-30 | `docs/openapi-specs/openapi-0330.json` | `pip install 'https://pkg.stainless.com/s/EverOS-python/57e6f13222c8cadeb2744ed45d3c31c768835ff4/evermemos-0.3.6-py3-none-any.whl'` | `http://localhost:9527` · `https://dev-gateway.aws.evermind.ai` · `https://test-gateway.aws.evermind.ai` · `https://api.evermind.ai` |
 
 SDK 路径：`code/openapi/stainless/evermemos/sdks/EverOS-python`
